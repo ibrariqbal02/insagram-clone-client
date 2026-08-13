@@ -6,69 +6,102 @@ type Props = {
   onDelete: () => void;
 };
 
+/** Map notification type → human-readable action text */
+function actionText(n: any): string {
+  switch (n.type) {
+    case "follow":  return "started following you.";
+    case "like":    return n.comment ? "liked your comment." : "liked your post.";
+    case "comment": return "commented on your post.";
+    case "reply":   return "replied to your comment.";
+    case "message": return "sent you a message.";
+    default:        return "sent you a notification.";
+  }
+}
+
+/** Short relative time matching Instagram style */
+function relativeTime(dateStr: string): string {
+  const diff  = Date.now() - new Date(dateStr).getTime();
+  const mins  = Math.floor(diff / 60_000);
+  const hours = Math.floor(diff / 3_600_000);
+  const days  = Math.floor(diff / 86_400_000);
+  const weeks = Math.floor(diff / 604_800_000);
+  if (mins  < 1)  return "just now";
+  if (mins  < 60) return `${mins}m`;
+  if (hours < 24) return `${hours}h`;
+  if (days  < 7)  return `${days}d`;
+  if (weeks < 52) return `${weeks}w`;
+  return new Date(dateStr).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
 const NotificationCard = ({ notification, onClick, onDelete }: Props) => {
   const sender = notification.sender;
 
-  const text =
-    notification.type === "follow"
-      ? "started following you"
-      : notification.type === "like"
-      ? notification.comment
-        ? "liked your comment"
-        : "liked your post"
-      : notification.type === "comment"
-      ? "commented on your post"
-      : notification.type === "reply"
-      ? "replied to your comment"
-      : notification.type === "message"
-      ? "sent you a message"
-      : "sent you a notification";
-
   return (
+    /*
+     * Real Instagram notification row:
+     *   - Full-width tap target, no border/card chrome
+     *   - Avatar left (44px), text middle (truncated), action right (post thumbnail or delete)
+     *   - Unread = slightly blue-tinted bg row
+     */
     <div
-      className={`flex items-center justify-between gap-3 rounded-xl border p-4 cursor-pointer ${
-        notification.isRead ? "bg-white" : "bg-blue-50"
-      }`}
       onClick={onClick}
+      className={`
+        flex items-center gap-3 px-4 py-2.5 cursor-pointer
+        active:bg-gray-100 transition
+        ${notification.isRead ? "bg-white" : "bg-blue-50"}
+      `}
     >
-      <div className="flex items-center gap-3 min-w-0">
+      {/* Avatar */}
+      <div className="shrink-0">
         {sender?.profilePicture ? (
           <img
             src={sender.profilePicture}
-            alt={sender.name}
-            className="w-12 h-12 rounded-full object-cover shrink-0"
+            alt={sender.name ?? "User"}
+            className="w-11 h-11 rounded-full object-cover"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-lg font-semibold shrink-0">
+          <div className="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center text-base font-semibold text-gray-500">
             {sender?.name?.[0]?.toUpperCase() ?? "?"}
           </div>
         )}
-
-        <div className="min-w-0">
-          <div className="text-sm truncate">
-            <span className="font-semibold mr-1">
-              {sender?.username}
-            </span>
-            {text}
-          </div>
-
-          <div className="text-xs text-gray-500">
-            {notification.createdAt
-              ? new Date(notification.createdAt).toLocaleString()
-              : ""}
-          </div>
-        </div>
       </div>
 
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        className="p-2 rounded-lg hover:bg-gray-100 text-red-600"
-      >
-        <Trash2 size={18} />
-      </button>
+      {/* Text */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-gray-900 leading-snug line-clamp-2">
+          <span className="font-semibold">{sender?.username ?? "Someone"}</span>
+          {" "}
+          {actionText(notification)}
+          {" "}
+          {notification.createdAt && (
+            <span className="text-gray-400 font-normal">
+              {relativeTime(notification.createdAt)}
+            </span>
+          )}
+        </p>
+      </div>
+
+      {/* Right: post thumbnail (if available) or delete button */}
+      <div className="shrink-0 ml-1">
+        {notification.post?.images?.[0]?.url ? (
+          <img
+            src={notification.post.images[0].url}
+            alt="post"
+            className="w-11 h-11 object-cover rounded-sm"
+          />
+        ) : (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 text-gray-400 hover:text-red-500 transition"
+            aria-label="Delete notification"
+          >
+            <Trash2 size={17} />
+          </button>
+        )}
+      </div>
     </div>
   );
 };

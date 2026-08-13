@@ -1,30 +1,55 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { Archive } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { Archive, Grid, Bookmark as BookmarkIcon } from "lucide-react";
+
 import { useMyProfile, useUserProfile } from "../../hooks/useProfile";
 import ProfileHeader from "../../components/organisms/ProfileHeader";
 import ProfilePosts from "../../components/organisms/ProfilePosts";
 import EditProfileModal from "../../components/organisms/EditProfileModal";
 
+/**
+ * Thin tab bar separating Posts / Saved — mirrors real Instagram.
+ * "Saved" is only shown on own profile.
+ */
+const ProfileTabBar = ({
+  isMe,
+}: {
+  isMe: boolean;
+}) => (
+  <div className="flex border-t border-gray-200 bg-white">
+    {/* Posts tab — always active for now */}
+    <button className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border-t-2 border-gray-900 text-gray-900">
+      <Grid size={16} strokeWidth={1.8} />
+      <span className="text-xs font-semibold uppercase tracking-wide hidden sm:inline">
+        Posts
+      </span>
+    </button>
+
+    {isMe && (
+      <button className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border-t-2 border-transparent text-gray-400">
+        <BookmarkIcon size={16} strokeWidth={1.8} />
+        <span className="text-xs font-semibold uppercase tracking-wide hidden sm:inline">
+          Saved
+        </span>
+      </button>
+    )}
+  </div>
+);
+
 const Profile = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  // If there is no :userId in the URL we are viewing our own profile
-  const { data: myProfileData, isLoading: myLoading } = useMyProfile();
 
-  // When a userId param exists we are viewing someone else's profile
-  const { data: otherProfileData, isLoading: otherLoading } = useUserProfile(
-    userId ?? ""
-  );
+  const { data: myProfileData, isLoading: myLoading } = useMyProfile();
+  const { data: otherProfileData, isLoading: otherLoading } = useUserProfile(userId ?? "");
 
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // Own profile
+  /* ── Own profile ─────────────────────────────── */
   if (!userId) {
     if (myLoading) {
       return (
-        <div className="flex justify-center py-20 text-gray-500">
+        <div className="flex justify-center py-20 text-gray-500 text-sm">
           Loading profile...
         </div>
       );
@@ -34,7 +59,7 @@ const Profile = () => {
 
     if (!me) {
       return (
-        <div className="flex justify-center py-20 text-gray-500">
+        <div className="flex justify-center py-20 text-gray-500 text-sm">
           Could not load profile.
         </div>
       );
@@ -42,23 +67,23 @@ const Profile = () => {
 
     return (
       <>
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* ProfileHeader expects a userId — pass own id */}
-          <ProfileHeader
-            userId={me._id}
-            onEditClick={() => setShowEditModal(true)}
-          />
+        <div className="bg-white">
+          <ProfileHeader userId={me._id} onEditClick={() => setShowEditModal(true)} />
+          <ProfileTabBar isMe />
           <ProfilePosts userId={me._id} />
+
+          {/* Archive link — subtle, below posts */}
+          <div className="flex justify-center py-6">
+            <button
+              onClick={() => navigate("/archive")}
+              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition"
+            >
+              <Archive size={15} />
+              View Archive
+            </button>
+          </div>
         </div>
-        <div className="flex justify-center">
-          <button
-            onClick={() => navigate("/archive")}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-gray-100 transition"
-          >
-            <Archive size={18} />
-            Archive
-          </button>
-        </div>
+
         {showEditModal && (
           <EditProfileModal
             user={me}
@@ -69,10 +94,10 @@ const Profile = () => {
     );
   }
 
-  // Another user's profile
+  /* ── Another user's profile ──────────────────── */
   if (otherLoading) {
     return (
-      <div className="flex justify-center py-20 text-gray-500">
+      <div className="flex justify-center py-20 text-gray-500 text-sm">
         Loading profile...
       </div>
     );
@@ -80,15 +105,16 @@ const Profile = () => {
 
   if (!otherProfileData?.user) {
     return (
-      <div className="flex justify-center py-20 text-gray-500">
+      <div className="flex justify-center py-20 text-gray-500 text-sm">
         User not found.
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="bg-white">
       <ProfileHeader userId={userId} />
+      <ProfileTabBar isMe={false} />
       <ProfilePosts userId={userId} />
     </div>
   );

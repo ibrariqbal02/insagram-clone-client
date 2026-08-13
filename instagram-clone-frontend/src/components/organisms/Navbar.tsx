@@ -8,8 +8,12 @@ import Avatar from "../atoms/Avatar";
 import PostDetailsModal from "./PostDetailsModal";
 
 /**
- * Top bar — visible only on mobile/tablet (hidden on lg+ where the sidebar takes over).
- * Matches Instagram's mobile header: wordmark left, action icons right.
+ * Mobile/tablet top bar — hidden on lg+ where the sidebar takes over.
+ * Matches real Instagram mobile header exactly:
+ *   - White background, hairline bottom border
+ *   - "Instagram" wordmark (cursive) on the left
+ *   - Message + notification icons on the right
+ *   - 44 px tall (standard iOS tap target)
  */
 const Navbar = () => {
   const navigate = useNavigate();
@@ -20,7 +24,7 @@ const Navbar = () => {
   const unreadCount =
     notifData?.notifications?.filter((n: any) => !n.isRead).length ?? 0;
 
-  // ── search ──────────────────────────────────────────────
+  // ── inline search (md tablets only) ─────────────────────
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -39,11 +43,16 @@ const Navbar = () => {
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {
-      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+      if (
+        searchBoxRef.current &&
+        !searchBoxRef.current.contains(e.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
-    const onEsc = (e: KeyboardEvent) => { if (e.key === "Escape") setShowDropdown(false); };
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowDropdown(false);
+    };
     document.addEventListener("mousedown", onClickOutside);
     document.addEventListener("keydown", onEsc);
     return () => {
@@ -59,34 +68,47 @@ const Navbar = () => {
   };
 
   return (
-    /* Only render on screens narrower than lg (1024 px) */
-    <header className="sticky top-0 z-50 bg-white border-b lg:hidden">
-      <div className="h-14 flex items-center justify-between px-4">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 lg:hidden pt-safe">
+      <div className="h-11 flex items-center justify-between px-4">
 
         {/* Wordmark */}
-        <Link to="/" className="font-logo text-2xl leading-none pt-1 select-none">
+        <Link
+          to="/"
+          className="font-logo text-[28px] leading-none select-none text-gray-900"
+          style={{ paddingTop: 2 }}
+        >
           Instagram
         </Link>
 
-        {/* Inline search — md only (hidden on small, hidden on lg+) */}
-        <div ref={searchBoxRef} className="hidden md:flex lg:hidden w-56 relative mx-4">
+        {/* Inline search — md tablets only */}
+        <div
+          ref={searchBoxRef}
+          className="hidden md:flex lg:hidden w-52 relative mx-4"
+        >
           <form
-            onSubmit={(e) => { e.preventDefault(); goToFullResults(); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              goToFullResults();
+            }}
             className="relative w-full"
           >
-            <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setShowDropdown(true)}
               placeholder="Search"
-              className="w-full bg-gray-100 rounded-lg py-2 pl-9 pr-3 text-sm outline-none"
+              className="w-full bg-gray-100 rounded-lg py-1.5 pl-8 pr-3 text-sm outline-none placeholder:text-gray-400"
+              style={{ fontSize: 16 }}
             />
           </form>
 
           {showDropdown && debouncedQuery.length > 0 && (
-            <div className="absolute top-11 left-0 w-full bg-white border rounded-xl shadow-lg max-h-80 overflow-y-auto z-50">
+            <div className="absolute top-10 left-0 w-full bg-white border border-gray-200 rounded-2xl shadow-lg max-h-80 overflow-y-auto z-50">
               {users.length === 0 && posts.length === 0 ? (
                 <div className="p-4 text-center text-gray-500 text-sm">
                   No results for "{debouncedQuery}"
@@ -101,25 +123,36 @@ const Navbar = () => {
                         setShowDropdown(false);
                         setQuery("");
                       }}
-                      className="flex items-center gap-3 w-full px-4 py-2 hover:bg-gray-50 text-left"
+                      className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-gray-50 text-left"
                     >
                       <Avatar src={u.profilePicture} name={u.name} size={8} />
                       <div className="leading-tight min-w-0">
-                        <div className="font-semibold text-sm truncate">{u.name}</div>
-                        <div className="text-xs text-gray-500 truncate">@{u.username}</div>
+                        <div className="font-semibold text-sm truncate">
+                          {u.name}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          @{u.username}
+                        </div>
                       </div>
                     </button>
                   ))}
                   {posts.length > 0 && (
-                    <div className="grid grid-cols-4 gap-1 px-2 pb-2">
+                    <div className="grid grid-cols-4 gap-0.5 px-2 pb-2">
                       {posts.map((p: any) => (
                         <button
                           key={p._id}
-                          onClick={() => { setOpenPostId(p._id); setShowDropdown(false); }}
+                          onClick={() => {
+                            setOpenPostId(p._id);
+                            setShowDropdown(false);
+                          }}
                           className="aspect-square overflow-hidden rounded"
                         >
                           {p.images?.[0]?.url && (
-                            <img src={p.images[0].url} alt={p.caption} className="w-full h-full object-cover" />
+                            <img
+                              src={p.images[0].url}
+                              alt={p.caption}
+                              className="w-full h-full object-cover"
+                            />
                           )}
                         </button>
                       ))}
@@ -127,7 +160,7 @@ const Navbar = () => {
                   )}
                   <button
                     onClick={goToFullResults}
-                    className="w-full border-t px-4 py-3 text-sm text-blue-600 font-semibold hover:bg-gray-50"
+                    className="w-full border-t border-gray-100 px-4 py-3 text-sm text-[#0095f6] font-semibold hover:bg-gray-50"
                   >
                     See all results for "{debouncedQuery}"
                   </button>
@@ -138,26 +171,37 @@ const Navbar = () => {
         </div>
 
         {/* Right action icons */}
-        <div className="flex items-center gap-4">
-          {/* Messages */}
-          <Link to="/messages" className="relative text-gray-800">
-            <MessageCircle size={24} strokeWidth={1.8} />
-          </Link>
-
-          {/* Notifications */}
-          <Link to="/notification" className="relative text-gray-800">
+        <div className="flex items-center gap-1">
+          {/* Notifications — heart */}
+          <Link
+            to="/notification"
+            className="relative flex items-center justify-center w-10 h-10 text-gray-900"
+            aria-label="Notifications"
+          >
             <Heart size={24} strokeWidth={1.8} />
             {unreadCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-0.5">
+              <span className="absolute top-1 right-1 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-0.5 leading-none">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
+          </Link>
+
+          {/* Messages — paper plane */}
+          <Link
+            to="/messages"
+            className="relative flex items-center justify-center w-10 h-10 text-gray-900"
+            aria-label="Messages"
+          >
+            <MessageCircle size={24} strokeWidth={1.8} />
           </Link>
         </div>
       </div>
 
       {openPostId && (
-        <PostDetailsModal postId={openPostId} onClose={() => setOpenPostId(null)} />
+        <PostDetailsModal
+          postId={openPostId}
+          onClose={() => setOpenPostId(null)}
+        />
       )}
     </header>
   );

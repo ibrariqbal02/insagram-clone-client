@@ -14,9 +14,9 @@ type RegisterFormData = {
 
 const Register = () => {
   const navigate = useNavigate();
-
   const registerMutation = useRegister();
   const [showPassword, setShowPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -25,127 +25,144 @@ const Register = () => {
 
   const onSubmit = (data: RegisterFormData) => {
     registerMutation.mutate(data, {
-      onSuccess: () => {
-        navigate("/login");
-      },
+      onSuccess: () => navigate("/login"),
     });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-10">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-        <h1 className="font-logo text-5xl text-center pb-1">Instagram</h1>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-between px-10 pt-12 pb-8">
+      <div className="w-full max-w-xs flex flex-col items-center">
 
-        <p className="text-center text-gray-500 mt-2 mb-8">
-          Sign up to see photos from your friends
+        {/* Wordmark */}
+        <h1 className="font-logo text-[44px] leading-none mb-3 select-none text-gray-900">
+          Instagram
+        </h1>
+
+        <p className="text-base font-semibold text-gray-400 text-center mb-5 leading-snug">
+          Sign up to see photos and videos from your friends.
         </p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-2.5">
+
+          {/* Full name */}
           <div>
             <input
               type="text"
-              placeholder="Full Name"
-              className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
-              {...register("name", {
-                required: "Name is required",
-              })}
+              placeholder="Full name"
+              className="
+                w-full bg-gray-50 border border-gray-300 rounded-md
+                px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400
+                focus:outline-none focus:border-gray-400 focus:bg-white transition
+              "
+              {...register("name", { required: "Name is required" })}
             />
-
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+              <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
             )}
           </div>
 
+          {/* Username */}
           <div>
             <input
               type="text"
               placeholder="Username"
-              className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
-              {...register("username", {
-                required: "Username is required",
-              })}
+              className="
+                w-full bg-gray-50 border border-gray-300 rounded-md
+                px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400
+                focus:outline-none focus:border-gray-400 focus:bg-white transition
+              "
+              {...register("username", { required: "Username is required" })}
             />
-
             {errors.username && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.username.message}
-              </p>
+              <p className="text-red-500 text-xs mt-1">{errors.username.message}</p>
             )}
           </div>
 
+          {/* Email */}
           <div>
             <input
               type="email"
               placeholder="Email"
-              className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500"
-              {...register("email", {
-                required: "Email is required",
-              })}
+              className="
+                w-full bg-gray-50 border border-gray-300 rounded-md
+                px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400
+                focus:outline-none focus:border-gray-400 focus:bg-white transition
+              "
+              {...register("email", { required: "Email is required" })}
             />
-
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.email.message}
-              </p>
+              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
             )}
           </div>
 
+          {/* Password */}
           <div>
-            {/* Container must be relative for positioning */}
-            <div className="relative flex items-center">
+            <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
-                className="w-full border rounded-lg p-3 pr-10 outline-none focus:ring-2 focus:ring-blue-500"
+                className="
+                  w-full bg-gray-50 border border-gray-300 rounded-md
+                  px-3 py-2.5 pr-11 text-sm text-gray-900 placeholder:text-gray-400
+                  focus:outline-none focus:border-gray-400 focus:bg-white transition
+                "
                 {...register("password", {
                   required: "Password is required",
-                  minLength: {
-                    value: 8,
-                    message: "Password must be at least 8 characters",
-                  },
+                  minLength: { value: 8, message: "At least 8 characters" },
                 })}
               />
-
-              {/* Positioned inside the input on the right side */}
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.password.message}
-              </p>
+              <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
             )}
           </div>
 
+          {/* Error */}
           {registerMutation.isError && (
-            <p className="text-center text-red-500">
+            <p className="text-red-500 text-xs text-center">
               {getErrorMessage(registerMutation.error, "Registration failed.")}
             </p>
           )}
 
+          {/* Fine-print */}
+          <p className="text-[11px] text-gray-400 text-center leading-snug pt-1">
+            By signing up, you agree to our{" "}
+            <span className="font-semibold text-gray-500">Terms</span>,{" "}
+            <span className="font-semibold text-gray-500">Privacy Policy</span> and{" "}
+            <span className="font-semibold text-gray-500">Cookies Policy</span>.
+          </p>
+
+          {/* Submit */}
           <button
             type="submit"
             disabled={registerMutation.isPending}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-3 font-semibold transition"
+            className="
+              w-full bg-[#0095f6] hover:bg-[#1877f2] active:bg-[#1877f2]
+              text-white font-semibold rounded-lg py-2 text-sm
+              disabled:opacity-60 transition
+            "
           >
-            {registerMutation.isPending ? "Creating Account..." : "Register"}
+            {registerMutation.isPending ? "Creating account…" : "Sign up"}
           </button>
         </form>
+      </div>
 
-        <div className="mt-8 text-center">
-          <p>
+      {/* Log in link — pinned to bottom */}
+      <div className="w-full max-w-xs">
+        <div className="border-t border-gray-200 pt-5 text-center">
+          <p className="text-sm text-gray-800">
             Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-blue-600 font-semibold hover:underline"
-            >
-              Login
+            <Link to="/login" className="text-[#0095f6] font-semibold">
+              Log in
             </Link>
           </p>
         </div>
