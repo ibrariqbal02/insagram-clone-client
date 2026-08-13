@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.app.json",
+  "compilerOptions": {
+    // Vite compiles src/ as native ESM (tsconfig.app.json), but ts-jest
+    // compiles each file to CommonJS for Jest's runtime — override just
+    // the module settings that conflict with that.
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "verbatimModuleSyntax": false,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": false,
+    "noEmit": false
+  }
+}
