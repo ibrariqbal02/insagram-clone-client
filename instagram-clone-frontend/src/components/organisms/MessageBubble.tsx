@@ -9,7 +9,7 @@ type Props = {
   showSenderName?: boolean;
 };
 
-const MessageBubble = ({ message, isMine, conversationId, showSenderName = false }: Props) => {
+const MessageBubble = ({ message, isMine, conversationId: _conversationId, showSenderName = false }: Props) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(message.content ?? "");

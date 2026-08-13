@@ -15,7 +15,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const { data: notifData } = useNotifications();
-  const { data: profileData } = useMyProfile();
+  useMyProfile();
 
   const unreadCount =
     notifData?.notifications?.filter((n: any) => !n.isRead).length ?? 0;
