@@ -11,11 +11,13 @@ import { useLikeUnlikePost } from "../../hooks/usePost";
 import { useMe } from "../../hooks/useAuth";
 
 type Image = { url: string; publicId: string };
+type Video = { url: string; publicId: string };
 type Owner = { _id: string; name: string; username: string; profilePicture: string };
 type Post  = {
   _id: string;
   caption: string;
   images: Image[];
+  video?: Video;
   likes: string[];
   owner: Owner;
   status: "active" | "archived";

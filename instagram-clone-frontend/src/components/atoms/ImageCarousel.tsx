@@ -1,25 +1,28 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-type Image = {
+type MediaItem = {
   url: string;
   publicId?: string;
 };
 
 type Props = {
-  images: Image[];
+  images: MediaItem[];
+  /** Optional single video. If provided, it is shown instead of the images carousel. */
+  video?: { url: string; publicId?: string };
   alt?: string;
-  /** Tailwind class(es) for the image height, e.g. "h-[500px]" */
+  /** Tailwind class(es) for the media height, e.g. "h-[500px]" */
   heightClass?: string;
   /** object-cover (default) | object-contain */
   fit?: "cover" | "contain";
-  /** Background colour class behind the image, e.g. "bg-black" */
+  /** Background colour class behind the media, e.g. "bg-black" */
   bgClass?: string;
   onClick?: () => void;
 };
 
 const ImageCarousel = ({
   images,
+  video,
   alt = "Post",
   heightClass = "h-[500px]",
   fit = "cover",
@@ -27,7 +30,30 @@ const ImageCarousel = ({
   onClick,
 }: Props) => {
   const [index, setIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
+  // ── Video post ───────────────────────────────────────────
+  if (video?.url) {
+    return (
+      <div
+        className={`relative w-full ${heightClass} ${bgClass} overflow-hidden`}
+        onClick={onClick}
+      >
+        <video
+          ref={videoRef}
+          src={video.url}
+          className={`w-full h-full object-${fit}`}
+          controls
+          playsInline
+          preload="metadata"
+          aria-label={alt}
+          onClick={(e) => e.stopPropagation()} // let controls work without triggering onClick
+        />
+      </div>
+    );
+  }
+
+  // ── Image carousel ───────────────────────────────────────
   if (!images || images.length === 0) return null;
 
   const total = images.length;
@@ -49,7 +75,6 @@ const ImageCarousel = ({
       className={`relative w-full ${heightClass} ${bgClass} overflow-hidden`}
       onClick={onClick}
     >
-      {/* Image */}
       <img
         src={images[index].url}
         alt={`${alt} ${index + 1}`}
@@ -57,7 +82,6 @@ const ImageCarousel = ({
         draggable={false}
       />
 
-      {/* Prev arrow */}
       {hasPrev && (
         <button
           onClick={prev}
@@ -68,7 +92,6 @@ const ImageCarousel = ({
         </button>
       )}
 
-      {/* Next arrow */}
       {hasNext && (
         <button
           onClick={next}
@@ -79,7 +102,6 @@ const ImageCarousel = ({
         </button>
       )}
 
-      {/* Dot indicators — only shown when there are multiple images */}
       {total > 1 && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
           {images.map((_, i) => (
@@ -88,16 +110,13 @@ const ImageCarousel = ({
               onClick={(e) => { e.stopPropagation(); setIndex(i); }}
               aria-label={`Go to image ${i + 1}`}
               className={`rounded-full transition-all ${
-                i === index
-                  ? "bg-white w-2 h-2"
-                  : "bg-white/50 w-1.5 h-1.5"
+                i === index ? "bg-white w-2 h-2" : "bg-white/50 w-1.5 h-1.5"
               }`}
             />
           ))}
         </div>
       )}
 
-      {/* Counter badge top-right (e.g. "2 / 4") */}
       {total > 1 && (
         <span className="absolute top-3 right-3 bg-black/50 text-white text-xs font-medium rounded-full px-2 py-0.5 select-none">
           {index + 1} / {total}
