@@ -1,15 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useMe } from "../hooks/useAuth";
+import PageSpinner from "../components/ui/PageSpinner";
 
 const ProtectedRoute = () => {
   const { data, isLoading, isError } = useMe();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   if (isError || !data?.user) {

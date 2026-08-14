@@ -36,7 +36,7 @@ const Login = () => {
      *   - "Forgot password?" below button
      *   - Divider + "Sign up" link near bottom
      */
-    <div className="min-h-screen bg-white flex flex-col items-center justify-between px-10 pt-16 pb-8">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-10 py-12">
       <div className="w-full max-w-xs flex flex-col items-center gap-0">
 
         {/* Wordmark */}
@@ -132,17 +132,12 @@ const Login = () => {
           </span>
           <div className="flex-1 h-px bg-gray-300" />
         </div>
-      </div>
 
-      {/* Sign up link — pinned to bottom like real Instagram */}
-      <div className="w-full max-w-xs">
-        <div className="border-t border-gray-200 pt-5 text-center">
+        {/* Sign up link */}
+        <div className="w-full border-t border-gray-200 pt-5 text-center">
           <p className="text-sm text-gray-800">
             Don't have an account?{" "}
-            <Link
-              to="/register"
-              className="text-[#0095f6] font-semibold"
-            >
+            <Link to="/register" className="text-[#0095f6] font-semibold">
               Sign up
             </Link>
           </p>

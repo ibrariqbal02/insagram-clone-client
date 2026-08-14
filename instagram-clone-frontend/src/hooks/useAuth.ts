@@ -32,6 +32,8 @@ export const useMe = () => {
   return useQuery({
     queryKey: ["me"],
     queryFn: authService.getMyProfile,
+    staleTime: 5 * 60 * 1000, // 5 minutes — avoids refetch on every mount/route change
+    retry: false,              // don't retry on 401; treat it as logged out immediately
   });
 };
 
