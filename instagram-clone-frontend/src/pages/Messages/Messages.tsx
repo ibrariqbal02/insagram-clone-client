@@ -20,13 +20,13 @@ const Messages = () => {
      * On desktop: 3-col grid (list | chat).
      */
     <div className="h-full overflow-hidden bg-white lg:rounded-xl lg:shadow">
-      <div className="grid grid-cols-1 md:grid-cols-3 h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-3 h-full">
 
         {/* ── Conversation list ─────────────────────── */}
         <div
           className={`
             flex flex-col h-full overflow-hidden border-r border-gray-200
-            ${conversationId ? "hidden md:flex" : "flex"}
+            ${conversationId ? "hidden lg:flex" : "flex"}
           `}
         >
           {/* Header */}
@@ -70,8 +70,8 @@ const Messages = () => {
         {/* ── Chat window ───────────────────────────── */}
         <div
           className={`
-            md:col-span-2 h-full overflow-hidden
-            ${conversationId ? "block" : "hidden md:block"}
+            lg:col-span-2 h-full overflow-hidden
+            ${conversationId ? "block" : "hidden lg:block"}
           `}
         >
           {conversationId ? (

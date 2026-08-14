@@ -111,17 +111,13 @@ const PostCard = ({ post }: Props) => {
           )}
         </div>
 
-        {/* ── Image ──────────────────────────────────────── */}
-        {post.images.length > 0 && (
+        {/* ── Media (images or video) ────────────────────── */}
+        {(post.images.length > 0 || post.video?.url) && (
           <div className="w-full">
             <ImageCarousel
               images={post.images}
+              video={post.video}
               alt={post.caption || "Post"}
-              /*
-               * Mobile: square (aspect-ratio via CSS).
-               * We pass a generous fixed height — the carousel clips it.
-               * On desktop the card constrains width so square looks great.
-               */
               heightClass="aspect-square h-auto max-h-[600px]"
               fit="cover"
               bgClass="bg-black"

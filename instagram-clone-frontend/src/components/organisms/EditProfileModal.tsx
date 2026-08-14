@@ -220,8 +220,8 @@ const EditProfileModal = ({ user, onClose }: Props) => {
   // -----------------------------
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 px-4 py-10">
-      <div className="bg-white rounded-xl w-full max-w-lg p-6 max-h-full overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:bg-black/50 md:px-4 md:py-10">
+      <div className="bg-white w-full md:rounded-xl md:max-w-lg p-6 overflow-y-auto" style={{ maxHeight: "100dvh" }}>
 
         {/* ================================= */}
         {/* Header */}

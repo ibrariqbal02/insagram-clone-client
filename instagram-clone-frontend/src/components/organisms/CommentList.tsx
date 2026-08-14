@@ -66,6 +66,7 @@ const CommentList = ({ postId, currentUserId }: Props) => {
           onKeyDown={(e) => e.key === "Enter" && handleCreateComment()}
           placeholder="Write a comment..."
           className="flex-1 border rounded-lg px-3 py-2 outline-none"
+          style={{ fontSize: 16 }}
         />
         <button
           onClick={handleCreateComment}

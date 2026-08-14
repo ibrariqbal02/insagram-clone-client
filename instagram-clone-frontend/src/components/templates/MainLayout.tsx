@@ -40,7 +40,7 @@ const MainLayout = () => {
           ${isMessages
             ? [
                 /* mobile */  "overflow-hidden",
-                /* desktop */ "lg:ml-[72px]",
+                /* desktop */ "lg:ml-[72px] lg:p-6",
               ].join(" ")
             : [
                 /* mobile */  "overflow-y-auto pb-tab-bar",

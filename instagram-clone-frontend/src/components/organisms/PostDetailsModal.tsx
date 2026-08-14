@@ -109,12 +109,16 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 px-4">
-        <div className="bg-white rounded-xl w-full max-w-4xl max-h-[85vh] overflow-hidden">
+      {/*
+        Mobile:  fullscreen sheet (inset-0, no border-radius, no padding)
+        Desktop: centered card with rounded corners and 85vh max height
+      */}
+      <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:bg-black/50 md:px-4">
+        <div className="bg-white w-full md:rounded-xl md:max-w-4xl md:max-h-[85vh] h-full md:h-auto overflow-hidden flex flex-col">
 
           {/* ================= HEADER ================= */}
 
-          <div className="flex items-center justify-between border-b px-4 py-3">
+          <div className="flex items-center justify-between border-b px-4 py-3 shrink-0">
 
             {/* Owner */}
 
@@ -219,21 +223,25 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
               Post not found.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2">
+            /*
+              Mobile:  single column, scrollable — image on top, info + comments below
+              Desktop: two-column side-by-side with fixed heights
+            */
+            <div className="flex-1 min-h-0 flex flex-col md:grid md:grid-cols-2 overflow-y-auto md:overflow-hidden">
 
               {/* ================= IMAGE ================= */}
 
-              <div className="bg-black flex items-center justify-center overflow-hidden">
+              <div className="bg-black flex items-center justify-center overflow-hidden shrink-0 md:shrink">
                 {post.images?.length ? (
                   <ImageCarousel
                     images={post.images}
                     alt={post.caption || "Post"}
-                    heightClass="h-[420px] md:h-[520px]"
+                    heightClass="h-auto aspect-square md:h-[520px] md:aspect-auto"
                     fit="contain"
                     bgClass="bg-black"
                   />
                 ) : (
-                  <div className="text-white py-20 h-[420px] md:h-[520px] flex items-center justify-center">
+                  <div className="text-white py-20 aspect-square md:h-[520px] md:aspect-auto flex items-center justify-center">
                     No image
                   </div>
                 )}
@@ -241,11 +249,11 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
 
               {/* ================= RIGHT SIDE ================= */}
 
-              <div className="flex flex-col h-[420px] md:h-[520px]">
+              <div className="flex flex-col md:h-[520px]">
 
                 {/* POST INFORMATION */}
 
-                <div className="p-4 border-b">
+                <div className="p-4 border-b shrink-0">
 
                   {/* LIKE */}
 

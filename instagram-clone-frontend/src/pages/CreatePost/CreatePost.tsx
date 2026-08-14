@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ImagePlus, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImagePlus, X, Film } from "lucide-react";
 
 import { useCreatePost } from "../../hooks/usePost";
 import { useMe } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const MAX_CAPTION_LENGTH = 2200;
+const ACCEPTED = "image/jpeg,image/png,image/jpg,image/webp,video/mp4,video/webm,video/quicktime,video/x-msvideo";
+
+type MediaMode = "images" | "video";
 
 const CreatePost = () => {
-  const navigate = useNavigate();
+  const navigate   = useNavigate();
   const { data: me } = useMe();
 
   const [files,       setFiles]       = useState<File[]>([]);
@@ -18,6 +21,8 @@ const CreatePost = () => {
   const [caption,     setCaption]     = useState("");
   const [isDragging,  setIsDragging]  = useState(false);
   const [step,        setStep]        = useState<"select" | "preview" | "caption">("select");
+  const [mediaMode,   setMediaMode]   = useState<MediaMode>("images");
+  const [error,       setError]       = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createPost   = useCreatePost();
@@ -32,7 +37,24 @@ const CreatePost = () => {
 
   const addFiles = (list: FileList | null) => {
     if (!list || list.length === 0) return;
-    setFiles(Array.from(list).slice(0, 5));
+    setError(null);
+
+    const arr = Array.from(list);
+    const isVideo = arr.some((f) => f.type.startsWith("video/"));
+    const isImage = arr.some((f) => f.type.startsWith("image/"));
+
+    if (isVideo && isImage) {
+      setError("A post can contain either images or a single video, not both.");
+      return;
+    }
+
+    if (isVideo && arr.length > 1) {
+      setError("Only one video per post is allowed.");
+      return;
+    }
+
+    setMediaMode(isVideo ? "video" : "images");
+    setFiles(isVideo ? [arr[0]] : arr.slice(0, 5));
     setStep("preview");
   };
 
@@ -45,6 +67,7 @@ const CreatePost = () => {
   const handleDiscard = () => {
     setFiles([]);
     setCaption("");
+    setError(null);
     setStep("select");
   };
 
@@ -52,9 +75,11 @@ const CreatePost = () => {
     if (files.length === 0) return;
     const formData = new FormData();
     formData.append("caption", caption);
-    files.forEach((f) => formData.append("images", f));
+    // field name is "media" — matches the updated backend route
+    files.forEach((f) => formData.append("media", f));
     createPost.mutate(formData, {
       onSuccess: () => { setFiles([]); setCaption(""); navigate("/"); },
+      onError: (err) => setError(getErrorMessage(err)),
     });
   };
 
@@ -86,6 +111,10 @@ const CreatePost = () => {
           </div>
           <p className="text-xl font-light text-gray-700">Add photos and videos</p>
 
+          {error && (
+            <p className="text-red-500 text-sm text-center">{error}</p>
+          )}
+
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -98,7 +127,7 @@ const CreatePost = () => {
             ref={fileInputRef}
             type="file"
             multiple
-            accept="image/*"
+            accept={ACCEPTED}
             className="hidden"
             onChange={(e) => addFiles(e.target.files)}
           />
@@ -107,7 +136,7 @@ const CreatePost = () => {
     );
   }
 
-  // ── Step: preview / crop ─────────────────────────────────
+  // ── Step: preview ─────────────────────────────────────────
   if (step === "preview") {
     return (
       <div className="flex flex-col min-h-full bg-white">
@@ -116,7 +145,9 @@ const CreatePost = () => {
           <button onClick={handleDiscard} className="text-gray-800">
             <ChevronLeft size={26} />
           </button>
-          <span className="text-base font-semibold">Crop</span>
+          <span className="text-base font-semibold">
+            {mediaMode === "video" ? "Preview" : "Crop"}
+          </span>
           <button
             onClick={() => setStep("caption")}
             className="text-[#0095f6] font-semibold text-sm"
@@ -125,85 +156,113 @@ const CreatePost = () => {
           </button>
         </div>
 
-        {/* Square image preview */}
+        {/* Media preview */}
         <div className="relative w-full aspect-square bg-black overflow-hidden">
-          <img
-            src={previews[activeIndex]}
-            alt={`Preview ${activeIndex + 1}`}
-            className="w-full h-full object-contain"
-          />
-
-          {previews.length > 1 && (
+          {mediaMode === "video" ? (
+            <video
+              src={previews[0]}
+              className="w-full h-full object-contain"
+              controls
+              playsInline
+              aria-label="Video preview"
+            />
+          ) : (
             <>
-              <button
-                type="button"
-                onClick={() => setActiveIndex((i) => (i === 0 ? previews.length - 1 : i - 1))}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveIndex((i) => (i === previews.length - 1 ? 0 : i + 1))}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white"
-              >
-                <ChevronRight size={20} />
-              </button>
+              <img
+                src={previews[activeIndex]}
+                alt={`Preview ${activeIndex + 1}`}
+                className="w-full h-full object-contain"
+              />
 
-              {/* Dot indicators */}
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                {previews.map((_, i) => (
+              {previews.length > 1 && (
+                <>
                   <button
-                    key={i}
-                    onClick={() => setActiveIndex(i)}
-                    className={`w-1.5 h-1.5 rounded-full transition ${
-                      i === activeIndex ? "bg-white" : "bg-white/40"
-                    }`}
-                  />
-                ))}
-              </div>
+                    type="button"
+                    onClick={() => setActiveIndex((i) => Math.max(0, i - 1))}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveIndex((i) => Math.min(previews.length - 1, i + 1))}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+
+                  {/* Dot indicators */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+                    {previews.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveIndex(i)}
+                        aria-label={`Go to image ${i + 1}`}
+                        className={`rounded-full transition-all ${
+                          i === activeIndex ? "bg-white w-2 h-2" : "bg-white/50 w-1.5 h-1.5"
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <span className="absolute top-3 right-3 bg-black/50 text-white text-xs font-medium rounded-full px-2 py-0.5">
+                    {activeIndex + 1} / {previews.length}
+                  </span>
+                </>
+              )}
             </>
           )}
-
-          {/* Change photos */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute right-3 top-3 bg-black/50 text-white text-xs font-medium rounded-full px-3 py-1.5"
-          >
-            Change
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => addFiles(e.target.files)}
-          />
         </div>
 
-        {/* Thumbnail strip — visible when multiple images */}
-        {previews.length > 1 && (
-          <div className="flex gap-0.5 px-0.5 py-1 bg-white border-b border-gray-100 overflow-x-auto">
-            {previews.map((src, i) => (
+        {/* Thumbnails strip (images only) */}
+        {mediaMode === "images" && files.length > 1 && (
+          <div className="flex gap-1.5 px-3 py-2 overflow-x-auto">
+            {previews.map((url, i) => (
               <button
                 key={i}
                 onClick={() => setActiveIndex(i)}
-                className={`shrink-0 w-16 h-16 overflow-hidden ${
-                  i === activeIndex ? "ring-2 ring-[#0095f6]" : "opacity-60"
+                className={`shrink-0 w-14 h-14 rounded overflow-hidden border-2 transition ${
+                  i === activeIndex ? "border-[#0095f6]" : "border-transparent"
                 }`}
               >
-                <img src={src} alt="" className="w-full h-full object-cover" />
+                <img src={url} alt={`thumb ${i + 1}`} className="w-full h-full object-cover" />
               </button>
             ))}
+
+            {/* Add more images button */}
+            {files.length < 5 && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="shrink-0 w-14 h-14 rounded bg-gray-100 flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300"
+                aria-label="Add more images"
+              >
+                <ImagePlus size={22} />
+              </button>
+            )}
           </div>
         )}
+
+        {/* Video badge */}
+        {mediaMode === "video" && (
+          <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-500">
+            <Film size={16} />
+            <span>{files[0]?.name}</span>
+          </div>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple={mediaMode === "images"}
+          accept={ACCEPTED}
+          className="hidden"
+          onChange={(e) => addFiles(e.target.files)}
+        />
       </div>
     );
   }
 
-  // ── Step: caption ────────────────────────────────────────
+  // ── Step: caption ─────────────────────────────────────────
   return (
     <div className="flex flex-col min-h-full bg-white">
       {/* Header */}
@@ -221,52 +280,35 @@ const CreatePost = () => {
         </button>
       </div>
 
-      {/* Caption editor */}
-      <div className="flex gap-3 px-4 py-3 border-b border-gray-100">
-        {/* Thumbnail */}
-        <div className="w-14 h-14 shrink-0 rounded overflow-hidden bg-gray-100">
-          <img
-            src={previews[0]}
-            alt="Selected"
-            className="w-full h-full object-cover"
-          />
+      {/* Thumbnail + caption */}
+      <div className="flex items-start gap-3 px-4 py-3 border-b border-gray-100">
+        {/* Mini preview */}
+        <div className="w-16 h-16 rounded overflow-hidden bg-black shrink-0">
+          {mediaMode === "video" ? (
+            <video src={previews[0]} className="w-full h-full object-cover" muted />
+          ) : (
+            <img src={previews[0]} alt="Preview" className="w-full h-full object-cover" />
+          )}
         </div>
 
-        <textarea
-          value={caption}
-          onChange={(e) => setCaption(e.target.value.slice(0, MAX_CAPTION_LENGTH))}
-          placeholder="Write a caption…"
-          rows={4}
-          className="flex-1 resize-none text-sm text-gray-900 placeholder:text-gray-400 outline-none leading-snug pt-0.5"
-          autoFocus
-        />
-      </div>
-
-      {/* Character count */}
-      <div className="px-4 py-2 text-xs text-gray-400 text-right border-b border-gray-100">
-        {caption.length}/{MAX_CAPTION_LENGTH}
-      </div>
-
-      {/* User info row */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-        {me?.user?.profilePicture ? (
-          <img
-            src={me.user.profilePicture}
-            alt={me.user.name}
-            className="w-8 h-8 rounded-full object-cover"
+        <div className="flex-1">
+          <p className="text-sm font-semibold mb-1">{me?.user?.username}</p>
+          <textarea
+            value={caption}
+            onChange={(e) => setCaption(e.target.value.slice(0, MAX_CAPTION_LENGTH))}
+            placeholder="Write a caption…"
+            rows={4}
+            className="w-full resize-none text-sm text-gray-800 placeholder-gray-400 outline-none"
+            style={{ fontSize: 16 }}
           />
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-gray-200" />
-        )}
-        <span className="text-sm font-semibold text-gray-900">
-          {me?.user?.username}
-        </span>
+          <p className="text-xs text-gray-400 text-right">
+            {caption.length} / {MAX_CAPTION_LENGTH}
+          </p>
+        </div>
       </div>
 
-      {createPost.isError && (
-        <p className="px-4 py-2 text-sm text-red-500">
-          {getErrorMessage(createPost.error, "Could not create post.")}
-        </p>
+      {error && (
+        <p className="text-red-500 text-sm px-4 pt-3">{error}</p>
       )}
     </div>
   );
