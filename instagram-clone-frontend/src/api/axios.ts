@@ -1,4 +1,5 @@
 import axios from "axios";
+import { QueryClient } from "@tanstack/react-query";
 
 // const baseURL = import.meta.env.VITE_API_BASE_URL || "/api";
 const baseURL = import.meta.env.VITE_API_URL || "/api";
@@ -10,6 +11,12 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+// Shared QueryClient instance — imported by other modules that need cache access
+export let sharedQueryClient: QueryClient | null = null;
+export const setSharedQueryClient = (qc: QueryClient) => {
+  sharedQueryClient = qc;
+};
 
 // Track whether a token refresh is already in flight so concurrent
 // requests don't each trigger their own refresh call.
@@ -61,6 +68,12 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         flushQueue(refreshError);
+        // Clear all cached data so the UI instantly reflects logged-out state
+        sharedQueryClient?.clear();
+        // Redirect to login — use window.location so it works outside React Router
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

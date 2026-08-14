@@ -39,7 +39,8 @@ const MainLayout = () => {
           transition-[margin] duration-200
           ${isMessages
             ? [
-                /* mobile */  "overflow-hidden",
+                /* mobile: fill height, subtract bottom tab bar */
+                "overflow-hidden pb-tab-bar lg:pb-0",
                 /* desktop */ "lg:ml-[72px] lg:p-6",
               ].join(" ")
             : [

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, MessageCircle, MoreHorizontal, Send, Bookmark } from "lucide-react";
 
@@ -8,6 +8,7 @@ import PostDetailsModal from "./PostDetailsModal";
 import PostOptionsMenu from "./PostOptionsMenu";
 import NewConversationModal from "./NewConversationModal";
 import { useLikeUnlikePost } from "../../hooks/usePost";
+import { useCreateComment } from "../../hooks/useComment";
 import { useMe } from "../../hooks/useAuth";
 
 type Image = { url: string; publicId: string };
@@ -44,18 +45,31 @@ function relativeTime(dateStr: string): string {
 const PostCard = ({ post }: Props) => {
   const [showDetails,    setShowDetails]    = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [commentText,    setCommentText]    = useState("");
+
+  const commentInputRef = useRef<HTMLInputElement>(null);
 
   const { data: me } = useMe();
-  const myId   = me?.user?._id;
+  const myId    = me?.user?._id;
   const isOwner = post.owner._id === myId;
 
-  const likeMutation = useLikeUnlikePost();
+  const likeMutation    = useLikeUnlikePost();
+  const createComment   = useCreateComment();
+
   const isLiked = useMemo(
     () => (myId ? post.likes.some((id) => id === myId) : false),
     [myId, post.likes]
   );
 
   const handleLike = () => likeMutation.mutate(post._id);
+
+  const handlePostComment = () => {
+    if (!commentText.trim()) return;
+    createComment.mutate(
+      { postId: post._id, text: commentText },
+      { onSuccess: () => setCommentText("") }
+    );
+  };
 
   return (
     <>
@@ -149,8 +163,9 @@ const PostCard = ({ post }: Props) => {
                 />
               </button>
 
+              {/* Comment icon focuses the inline input */}
               <button
-                onClick={() => setShowDetails(true)}
+                onClick={() => commentInputRef.current?.focus()}
                 className="flex items-center justify-center w-9 h-9"
                 aria-label="Comment"
               >
@@ -197,22 +212,50 @@ const PostCard = ({ post }: Props) => {
             </p>
           ) : null}
 
-          {/* View comments link */}
+          {/* View all comments — opens modal */}
           <button
             onClick={() => setShowDetails(true)}
-            className="text-gray-400 text-sm mt-1"
+            className="text-gray-400 text-sm mt-1 block"
           >
             View all comments
           </button>
 
           {/* Timestamp */}
           {post.createdAt && (
-            <p className="text-[10px] uppercase tracking-wide text-gray-400 mt-1 mb-1">
+            <p className="text-[10px] uppercase tracking-wide text-gray-400 mt-1">
               {new Date(post.createdAt).toLocaleDateString(undefined, {
                 month: "long",
                 day: "numeric",
               })}
             </p>
+          )}
+        </div>
+
+        {/* ── Inline comment input (like real Instagram) ──── */}
+        <div className="flex items-center gap-2 px-3 pb-3 border-t border-gray-100 pt-2">
+          <Avatar
+            src={me?.user?.profilePicture}
+            name={me?.user?.name}
+            size={7}
+          />
+          <input
+            ref={commentInputRef}
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handlePostComment()}
+            placeholder="Add a comment…"
+            className="flex-1 text-sm outline-none placeholder-gray-400 bg-transparent"
+            style={{ fontSize: 14 }}
+            aria-label="Add a comment"
+          />
+          {commentText.trim().length > 0 && (
+            <button
+              onClick={handlePostComment}
+              disabled={createComment.isPending}
+              className="text-[#0095f6] font-semibold text-sm disabled:opacity-50"
+            >
+              Post
+            </button>
           )}
         </div>
       </article>

@@ -229,10 +229,21 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
             */
             <div className="flex-1 min-h-0 flex flex-col md:grid md:grid-cols-2 overflow-y-auto md:overflow-hidden">
 
-              {/* ================= IMAGE ================= */}
+              {/* ================= MEDIA (image or video) ================= */}
 
               <div className="bg-black flex items-center justify-center overflow-hidden shrink-0 md:shrink">
-                {post.images?.length ? (
+                {post.video?.url ? (
+                  /* Video post */
+                  <ImageCarousel
+                    images={[]}
+                    video={post.video}
+                    alt={post.caption || "Post"}
+                    heightClass="h-auto aspect-square md:h-[520px] md:aspect-auto"
+                    fit="contain"
+                    bgClass="bg-black"
+                  />
+                ) : post.images?.length ? (
+                  /* Image carousel */
                   <ImageCarousel
                     images={post.images}
                     alt={post.caption || "Post"}
@@ -242,14 +253,19 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
                   />
                 ) : (
                   <div className="text-white py-20 aspect-square md:h-[520px] md:aspect-auto flex items-center justify-center">
-                    No image
+                    No media
                   </div>
                 )}
               </div>
 
               {/* ================= RIGHT SIDE ================= */}
 
-              <div className="flex flex-col md:h-[520px]">
+              {/*
+                Mobile: flex column that fills remaining height so CommentList
+                can grow/scroll and the input sticks to the bottom.
+                Desktop: fixed 520px height.
+              */}
+              <div className="flex flex-col flex-1 min-h-0 md:h-[520px]">
 
                 {/* POST INFORMATION */}
 

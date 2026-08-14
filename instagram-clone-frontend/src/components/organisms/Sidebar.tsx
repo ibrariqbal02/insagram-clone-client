@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNotifications } from "../../hooks/useNotification";
 import { useMyProfile } from "../../hooks/useProfile";
 import api from "../../api/axios";
@@ -19,6 +20,7 @@ import api from "../../api/axios";
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const [collapsed, setCollapsed] = useState(false);
 
   const { data: notifData } = useNotifications();
@@ -36,6 +38,7 @@ const Sidebar = () => {
     } catch {
       // ignore — redirect regardless
     }
+    queryClient.clear();
     navigate("/login");
   };
 
@@ -43,23 +46,25 @@ const Sidebar = () => {
   const isMessages = location.pathname.startsWith("/messages");
   const isNarrow = collapsed || isMessages;
 
+  // Desktop sidebar nav — matches real Instagram's order exactly
   const navItems = [
     { name: "Home",          icon: Home,          path: "/" },
     { name: "Search",        icon: Search,        path: "/search" },
     { name: "Explore",       icon: Compass,       path: "/search" },
-    { name: "Reels",         icon: Film,          path: "/" },
+    { name: "Reels",         icon: Film,          path: "/reels" },
     { name: "Messages",      icon: MessageCircle, path: "/messages" },
     { name: "Notifications", icon: Heart,         path: "/notification" },
     { name: "Create",        icon: PlusSquare,    path: "/create-post" },
   ];
 
   // ─────────────────────────────────────────────────────────
-  // Mobile bottom tab items (5 icons like real Instagram)
+  // Mobile bottom tab — 6 icons (real Instagram has messages too)
   // ─────────────────────────────────────────────────────────
   const mobileTabItems = [
     { name: "Home",          icon: Home,          path: "/" },
     { name: "Search",        icon: Search,        path: "/search" },
     { name: "Create",        icon: PlusSquare,    path: "/create-post" },
+    { name: "Messages",      icon: MessageCircle, path: "/messages" },
     { name: "Notifications", icon: Heart,         path: "/notification" },
     { name: "Profile",       icon: null,          path: "/profile" },
   ];
@@ -197,7 +202,7 @@ const Sidebar = () => {
         Real Instagram bottom bar:
           - Pure white background
           - 0.5 px top border
-          - 5 equally-spaced icons, each ~44px tap target
+          - 6 equally-spaced icons (Home, Search, Create, Messages, Notifications, Profile)
           - Active icon is full black / filled; inactive is outlined gray
           - Bottom padding = safe-area-inset-bottom (home indicator space)
       */}

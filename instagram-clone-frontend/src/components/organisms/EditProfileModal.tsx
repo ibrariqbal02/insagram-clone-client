@@ -48,8 +48,9 @@ const EditProfileModal = ({ user, onClose }: Props) => {
   const [username, setUsername] = useState(user.username);
   const [bio, setBio] = useState(user.bio);
 
-  const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState(user.profilePicture);
+  const [image,          setImage]          = useState<File | null>(null);
+  const [preview,        setPreview]        = useState(user.profilePicture);
+  const [removePhoto,    setRemovePhoto]    = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,6 +108,9 @@ const EditProfileModal = ({ user, onClose }: Props) => {
 
     if (image) {
       formData.append("profilePicture", image);
+    } else if (removePhoto) {
+      // Tell the backend to delete the existing profile picture
+      formData.append("removeProfilePicture", "true");
     }
 
     updateProfile.mutate(formData, {
@@ -244,41 +248,71 @@ const EditProfileModal = ({ user, onClose }: Props) => {
 
           <div className="flex flex-col items-center gap-3">
 
-            <div
+            {/*
+              Avatar — tappable on both mobile and desktop.
+              We use a plain onClick (no group-hover) so it works on touch.
+            */}
+            <button
+              type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="group relative w-28 h-28 rounded-full overflow-hidden cursor-pointer border"
+              className="relative w-28 h-28 rounded-full overflow-hidden border focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-label="Change profile photo"
             >
-
-              {preview ? (
+              {preview && !removePhoto ? (
                 <img
                   src={preview}
                   alt="profile"
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
-                  No Image
+                <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm">
+                  No photo
                 </div>
               )}
 
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition">
-
-                <Camera
-                  size={24}
-                  className="text-white"
-                />
-
+              {/* Always-visible camera overlay so touch users see the affordance */}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <Camera size={24} className="text-white" />
               </div>
-
-            </div>
-
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="text-sm font-semibold text-blue-600 hover:text-blue-700"
-            >
-              Change profile photo
             </button>
+
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+              >
+                Change photo
+              </button>
+
+              {/* Remove photo — only shown when a picture exists */}
+              {(preview || user.profilePicture) && !removePhoto && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImage(null);
+                    setPreview("");
+                    setRemovePhoto(true);
+                  }}
+                  className="text-sm font-semibold text-red-500 hover:text-red-600"
+                >
+                  Remove photo
+                </button>
+              )}
+
+              {removePhoto && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreview(user.profilePicture);
+                    setRemovePhoto(false);
+                  }}
+                  className="text-sm text-gray-500 hover:text-gray-700"
+                >
+                  Undo
+                </button>
+              )}
+            </div>
 
             <input
               ref={fileInputRef}
@@ -286,7 +320,9 @@ const EditProfileModal = ({ user, onClose }: Props) => {
               accept="image/*"
               className="hidden"
               onChange={(e) => {
-                setImage(e.target.files?.[0] || null);
+                const file = e.target.files?.[0] || null;
+                setImage(file);
+                setRemovePhoto(false);
               }}
             />
 
