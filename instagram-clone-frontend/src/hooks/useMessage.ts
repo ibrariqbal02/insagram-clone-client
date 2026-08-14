@@ -10,6 +10,7 @@ import {
   sendMessage,
   deleteMessage,
   editMessage,
+  sendVoiceMessage,
 } from "../services/message.service";
 
 // ─── Polling intervals ────────────────────────────────────────────────────────
@@ -113,6 +114,51 @@ export const useEditMessage = () => {
     mutationFn: editMessage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
+    },
+  });
+};
+
+export const useSendVoiceMessage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: sendVoiceMessage,
+
+    // Optimistic placeholder so the sender sees a "Sending…" bubble immediately
+    onMutate: async (variables) => {
+      const queryKey = ["messages", variables.conversationId];
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData(queryKey);
+
+      queryClient.setQueryData(queryKey, (old: any) => {
+        const optimistic = {
+          _id: `optimistic-voice-${Date.now()}`,
+          type: "voice",
+          content: "",
+          sender: { _id: "__optimistic__" },
+          createdAt: new Date().toISOString(),
+          _optimistic: true,
+        };
+        return {
+          ...(old ?? {}),
+          messages: [...(old?.messages ?? []), optimistic],
+        };
+      });
+
+      return { previous, queryKey };
+    },
+
+    onError: (_err, _vars, context: any) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previous);
+      }
+    },
+
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["messages", variables.conversationId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
   });
 };

@@ -6,6 +6,7 @@ import {
   useConversations,
   useMessages,
   useSendMessage,
+  useSendVoiceMessage,
 } from "../../hooks/useMessage";
 import { useMyProfile } from "../../hooks/useProfile";
 import MessageBubble from "./MessageBubble";
@@ -46,10 +47,15 @@ const ChatWindow = ({ conversationId }: Props) => {
     : [];
 
   const sendMessage = useSendMessage();
+  const sendVoiceMessage = useSendVoiceMessage();
 
   const handleSend = (text: string) => {
     if (!text.trim()) return;
     sendMessage.mutate({ conversationId, content: text });
+  };
+
+  const handleSendVoice = (blob: Blob) => {
+    sendVoiceMessage.mutate({ conversationId, audioBlob: blob });
   };
 
   useEffect(() => {
@@ -185,7 +191,12 @@ const ChatWindow = ({ conversationId }: Props) => {
       </div>
 
       {/* ── Input ── */}
-      <MessageInput onSend={handleSend} loading={sendMessage.isPending} />
+      <MessageInput
+        onSend={handleSend}
+        onSendVoice={handleSendVoice}
+        loading={sendMessage.isPending}
+        voiceLoading={sendVoiceMessage.isPending}
+      />
     </div>
   );
 };

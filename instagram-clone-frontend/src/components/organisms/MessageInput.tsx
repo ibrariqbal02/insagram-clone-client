@@ -1,35 +1,61 @@
-import { Send } from "lucide-react";
+import { Mic, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import VoiceRecorder from "./VoiceRecorder";
 
 type Props = {
   onSend: (text: string) => void;
+  onSendVoice: (blob: Blob) => void;
   loading: boolean;
+  voiceLoading: boolean;
 };
 
-const MessageInput = ({ onSend, loading }: Props) => {
+const MessageInput = ({ onSend, onSendVoice, loading, voiceLoading }: Props) => {
   const [text, setText] = useState("");
+  const [showRecorder, setShowRecorder] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus the input whenever the chat window mounts or the
-  // conversation changes (parent unmounts/remounts this component).
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (!showRecorder) inputRef.current?.focus();
+  }, [showRecorder]);
 
   const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
     onSend(trimmed);
     setText("");
-    // Keep focus after sending so the user can type the next message immediately
     inputRef.current?.focus();
   };
+
+  const handleVoiceSend = (blob: Blob) => {
+    onSendVoice(blob);
+    setShowRecorder(false);
+  };
+
+  // While the recorder is open, render it in place of the normal input bar
+  if (showRecorder) {
+    return (
+      <VoiceRecorder
+        onSend={handleVoiceSend}
+        onCancel={() => setShowRecorder(false)}
+        loading={voiceLoading}
+      />
+    );
+  }
 
   return (
     <div
       className="border-t border-gray-200 bg-white px-3 py-2.5 flex items-center gap-2.5 shrink-0"
       style={{ paddingBottom: "max(10px, env(safe-area-inset-bottom, 10px))" }}
     >
+      {/* Mic button — opens voice recorder */}
+      <button
+        onClick={() => setShowRecorder(true)}
+        title="Record voice message"
+        className="shrink-0 rounded-full p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition"
+      >
+        <Mic size={18} />
+      </button>
+
       <input
         ref={inputRef}
         value={text}

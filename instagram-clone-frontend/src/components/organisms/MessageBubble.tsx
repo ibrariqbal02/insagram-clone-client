@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Pencil, Trash2, Check, X } from "lucide-react";
+import { Pencil, Trash2, Check, X, Mic } from "lucide-react";
 import { useDeleteMessage, useEditMessage } from "../../hooks/useMessage";
 
 type Props = {
@@ -18,7 +18,6 @@ const MessageBubble = ({ message, isMine, conversationId: _conversationId, showS
   const deleteMessage = useDeleteMessage();
   const editMessage = useEditMessage();
 
-  // Focus the edit input as soon as it mounts
   useEffect(() => {
     if (isEditing) {
       editInputRef.current?.focus();
@@ -35,13 +34,14 @@ const MessageBubble = ({ message, isMine, conversationId: _conversationId, showS
         minute: "2-digit",
       });
 
+  const isVoice = message.type === "voice";
+  // Voice messages can't be edited, so suppress the edit action
+  const canEdit = isMine && !isVoice;
+
   const handleDelete = () => {
     if (message._optimistic) return;
     if (!window.confirm("Delete this message?")) return;
-    deleteMessage.mutate(message._id, {
-      // Optimistically remove from the list immediately
-      onSuccess: () => {},
-    });
+    deleteMessage.mutate(message._id);
   };
 
   const handleEditStart = () => {
@@ -83,6 +83,7 @@ const MessageBubble = ({ message, isMine, conversationId: _conversationId, showS
           {message.sender.name}
         </p>
       )}
+
       {/* ── Action bar (own messages only, shown on hover) ── */}
       {isMine && !message._optimistic && (
         <div
@@ -90,13 +91,15 @@ const MessageBubble = ({ message, isMine, conversationId: _conversationId, showS
             isHovered ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none"
           }`}
         >
-          <button
-            onClick={handleEditStart}
-            title="Edit message"
-            className="p-1 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition"
-          >
-            <Pencil size={14} />
-          </button>
+          {canEdit && (
+            <button
+              onClick={handleEditStart}
+              title="Edit message"
+              className="p-1 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition"
+            >
+              <Pencil size={14} />
+            </button>
+          )}
           <button
             onClick={handleDelete}
             disabled={deleteMessage.isPending}
@@ -110,14 +113,53 @@ const MessageBubble = ({ message, isMine, conversationId: _conversationId, showS
 
       {/* ── Bubble ── */}
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-2 shadow-sm ${
-          isMine
-            ? "bg-blue-500 text-white rounded-br-sm"
-            : "bg-white border rounded-bl-sm"
+        className={`max-w-[75%] rounded-2xl shadow-sm ${
+          isVoice
+            ? // Voice bubbles: minimal padding, slightly wider
+              `px-3 py-2 ${isMine ? "bg-blue-500 rounded-br-sm" : "bg-white border rounded-bl-sm"}`
+            : `px-4 py-2 ${isMine ? "bg-blue-500 text-white rounded-br-sm" : "bg-white border rounded-bl-sm"}`
         } ${message._optimistic ? "opacity-70" : ""}`}
       >
-        {isEditing ? (
-          /* Inline edit mode */
+        {/* ── Voice message ── */}
+        {isVoice ? (
+          <div className="flex flex-col gap-1">
+            {message._optimistic || !message.content ? (
+              // Optimistic placeholder while uploading
+              <div className="flex items-center gap-2 text-sm text-white/80 py-1">
+                <Mic size={15} className="shrink-0" />
+                <span>Sending voice message…</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Mic
+                  size={15}
+                  className={`shrink-0 ${isMine ? "text-white/70" : "text-gray-400"}`}
+                />
+                <audio
+                  src={message.content}
+                  controls
+                  preload="metadata"
+                  className="h-8"
+                  style={{
+                    // Tighten up the native player so it fits the bubble
+                    minWidth: 180,
+                    maxWidth: 260,
+                    colorScheme: "light",
+                  }}
+                />
+              </div>
+            )}
+            {/* Timestamp */}
+            <p
+              className={`text-[11px] mt-0.5 ${
+                isMine ? "text-blue-100" : "text-gray-400"
+              }`}
+            >
+              {timestamp}
+            </p>
+          </div>
+        ) : isEditing ? (
+          /* ── Inline edit mode ── */
           <div className="flex items-center gap-2 min-w-[160px]">
             <input
               ref={editInputRef}
@@ -143,22 +185,23 @@ const MessageBubble = ({ message, isMine, conversationId: _conversationId, showS
             </button>
           </div>
         ) : (
-          <p className="break-words text-sm leading-relaxed">
-            {message.content}
-          </p>
+          /* ── Text message ── */
+          <>
+            <p className="break-words text-sm leading-relaxed">
+              {message.content}
+            </p>
+            <p
+              className={`mt-0.5 text-[11px] ${
+                isMine ? "text-blue-100" : "text-gray-400"
+              }`}
+            >
+              {timestamp}
+              {message.isEdited && !message._optimistic && (
+                <span className="ml-1 italic">· edited</span>
+              )}
+            </p>
+          </>
         )}
-
-        {/* Timestamp + edited label */}
-        <p
-          className={`mt-0.5 text-[11px] ${
-            isMine ? "text-blue-100" : "text-gray-400"
-          }`}
-        >
-          {timestamp}
-          {message.isEdited && !message._optimistic && (
-            <span className="ml-1 italic">· edited</span>
-          )}
-        </p>
       </div>
     </div>
   );
