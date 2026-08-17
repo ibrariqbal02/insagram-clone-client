@@ -77,7 +77,7 @@ const PostCard = ({ post }: Props) => {
         Mobile: no card chrome — flat, full-width, white, hairline divider at bottom.
         Desktop: card with rounded corners + shadow.
       */}
-      <article className="bg-white border-b border-gray-200 lg:rounded-xl lg:border lg:shadow lg:mb-6">
+      <article className="bg-white dark:bg-black border-b border-gray-200 dark:border-neutral-800 lg:rounded-xl lg:border lg:shadow lg:mb-6 dark:lg:border-neutral-800">
 
         {/* ── Header ─────────────────────────────────────── */}
         <div className="flex items-center justify-between px-3 py-2.5">
@@ -97,11 +97,11 @@ const PostCard = ({ post }: Props) => {
             </div>
 
             <div className="min-w-0">
-              <p className="font-semibold text-sm leading-tight truncate">
+              <p className="font-semibold text-sm leading-tight truncate dark:text-white">
                 {post.owner.username}
               </p>
               {post.createdAt && (
-                <p className="text-[11px] text-gray-400 leading-tight">
+                <p className="text-[11px] text-gray-400 dark:text-neutral-500 leading-tight">
                   {relativeTime(post.createdAt)}
                 </p>
               )}
@@ -117,7 +117,7 @@ const PostCard = ({ post }: Props) => {
           ) : (
             <button
               onClick={() => setShowDetails(true)}
-              className="flex items-center justify-center w-9 h-9 -mr-1 text-gray-700"
+              className="flex items-center justify-center w-9 h-9 -mr-1 text-gray-700 dark:text-neutral-300"
               aria-label="More options"
             >
               <MoreHorizontal size={20} />
@@ -154,7 +154,7 @@ const PostCard = ({ post }: Props) => {
                 <Heart
                   size={26}
                   strokeWidth={1.8}
-                  className={isLiked ? "text-red-500" : "text-gray-900"}
+                  className={isLiked ? "text-red-500" : "text-gray-900 dark:text-white"}
                   fill={isLiked ? "currentColor" : "none"}
                   style={{
                     transition: "transform 0.1s ease",
@@ -169,7 +169,7 @@ const PostCard = ({ post }: Props) => {
                 className="flex items-center justify-center w-9 h-9"
                 aria-label="Comment"
               >
-                <MessageCircle size={26} strokeWidth={1.8} className="text-gray-900" />
+                <MessageCircle size={26} strokeWidth={1.8} className="text-gray-900 dark:text-white" />
               </button>
 
               <button
@@ -178,7 +178,7 @@ const PostCard = ({ post }: Props) => {
                 aria-label="Share"
               >
                 {/* Instagram uses a paper-plane (send) icon */}
-                <Send size={24} strokeWidth={1.8} className="text-gray-900" />
+                <Send size={24} strokeWidth={1.8} className="text-gray-900 dark:text-white" />
               </button>
             </div>
 
@@ -187,13 +187,13 @@ const PostCard = ({ post }: Props) => {
               className="flex items-center justify-center w-9 h-9 -mr-1.5"
               aria-label="Save"
             >
-              <Bookmark size={24} strokeWidth={1.8} className="text-gray-900" />
+              <Bookmark size={24} strokeWidth={1.8} className="text-gray-900 dark:text-white" />
             </button>
           </div>
 
           {/* Likes count */}
           {post.likes.length > 0 && (
-            <p className="font-semibold text-sm mt-1">
+            <p className="font-semibold text-sm mt-1 dark:text-white">
               {post.likes.length.toLocaleString()}{" "}
               {post.likes.length === 1 ? "like" : "likes"}
             </p>
@@ -201,7 +201,7 @@ const PostCard = ({ post }: Props) => {
 
           {/* Caption */}
           {post.caption ? (
-            <p className="text-sm mt-1 leading-snug">
+            <p className="text-sm mt-1 leading-snug dark:text-neutral-200">
               <Link
                 to={`/profile/${post.owner._id}`}
                 className="font-semibold mr-1 hover:underline"
@@ -215,14 +215,14 @@ const PostCard = ({ post }: Props) => {
           {/* View all comments — opens modal */}
           <button
             onClick={() => setShowDetails(true)}
-            className="text-gray-400 text-sm mt-1 block"
+            className="text-gray-400 dark:text-neutral-500 text-sm mt-1 block"
           >
             View all comments
           </button>
 
           {/* Timestamp */}
           {post.createdAt && (
-            <p className="text-[10px] uppercase tracking-wide text-gray-400 mt-1">
+            <p className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-neutral-500 mt-1">
               {new Date(post.createdAt).toLocaleDateString(undefined, {
                 month: "long",
                 day: "numeric",
@@ -232,7 +232,7 @@ const PostCard = ({ post }: Props) => {
         </div>
 
         {/* ── Inline comment input (like real Instagram) ──── */}
-        <div className="flex items-center gap-2 px-3 pb-3 border-t border-gray-100 pt-2">
+        <div className="flex items-center gap-2 px-3 pb-3 border-t border-gray-100 dark:border-neutral-800 pt-2">
           <Avatar
             src={me?.user?.profilePicture}
             name={me?.user?.name}
@@ -244,7 +244,7 @@ const PostCard = ({ post }: Props) => {
             onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handlePostComment()}
             placeholder="Add a comment…"
-            className="flex-1 text-sm outline-none placeholder-gray-400 bg-transparent"
+            className="flex-1 text-sm outline-none placeholder-gray-400 dark:placeholder-neutral-500 bg-transparent dark:text-white"
             style={{ fontSize: 14 }}
             aria-label="Add a comment"
           />

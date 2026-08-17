@@ -45,7 +45,7 @@ const CommentList = ({ postId, currentUserId }: Props) => {
         {isLoading && <div>Loading comments...</div>}
 
         {!isLoading && rootComments.length === 0 && (
-          <div className="text-center text-gray-500">No comments yet.</div>
+          <div className="text-center text-gray-500 dark:text-neutral-400">No comments yet.</div>
         )}
 
         {rootComments.map((comment: any) => (
@@ -59,19 +59,19 @@ const CommentList = ({ postId, currentUserId }: Props) => {
         ))}
       </div>
 
-      <div className="border-t p-4 flex gap-2">
+      <div className="border-t dark:border-neutral-800 p-4 flex gap-2">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreateComment()}
           placeholder="Write a comment..."
-          className="flex-1 border rounded-lg px-3 py-2 outline-none"
+          className="flex-1 border dark:border-neutral-700 rounded-lg px-3 py-2 outline-none bg-white dark:bg-neutral-900 dark:text-white dark:placeholder-neutral-500"
           style={{ fontSize: 16 }}
         />
         <button
           onClick={handleCreateComment}
           disabled={createComment.isPending}
-          className="bg-blue-600 text-white px-5 rounded-lg"
+          className="bg-blue-600 text-white px-5 rounded-lg disabled:opacity-50"
         >
           Send
         </button>

@@ -186,6 +186,7 @@ const ProfileHeader = ({ userId, onEditClick }: Props) => {
               Edit profile
             </button>
             <button
+              onClick={() => navigate("/settings")}
               className="flex items-center justify-center w-10 bg-gray-100 hover:bg-gray-200 transition rounded-lg"
               aria-label="Settings"
             >

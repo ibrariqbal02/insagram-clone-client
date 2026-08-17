@@ -5,3 +5,8 @@ export const getFeed = async () => {
 
   return response.data;
 };
+
+export const getReels = async () => {
+  const response = await api.get("/feed/reels");
+  return response.data;
+};

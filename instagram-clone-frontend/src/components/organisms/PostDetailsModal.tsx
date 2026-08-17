@@ -114,11 +114,11 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
         Desktop: centered card with rounded corners and 85vh max height
       */}
       <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center md:bg-black/50 md:px-4">
-        <div className="bg-white w-full md:rounded-xl md:max-w-4xl md:max-h-[85vh] h-full md:h-auto overflow-hidden flex flex-col">
+        <div className="bg-white dark:bg-neutral-950 w-full md:rounded-xl md:max-w-4xl md:max-h-[85vh] h-full md:h-auto overflow-hidden flex flex-col">
 
           {/* ================= HEADER ================= */}
 
-          <div className="flex items-center justify-between border-b px-4 py-3 shrink-0">
+          <div className="flex items-center justify-between border-b dark:border-neutral-800 px-4 py-3 shrink-0">
 
             {/* Owner */}
 
@@ -142,7 +142,7 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
                   {post?.owner?.name}
                 </div>
 
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 dark:text-neutral-400">
                   @{post?.owner?.username}
                 </div>
               </div>
@@ -160,7 +160,7 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
                     <button
                       onClick={handleUnarchivePost}
                       disabled={unarchivePostMutation.isPending}
-                      className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 disabled:opacity-50"
                       title="Unarchive post"
                     >
                       <ArchiveRestore size={18} />
@@ -169,7 +169,7 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
                     <button
                       onClick={handleArchivePost}
                       disabled={archivePostMutation.isPending}
-                      className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 disabled:opacity-50"
                       title="Archive post"
                     >
                       <Archive size={18} />
@@ -180,7 +180,7 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
 
                   <button
                     onClick={() => setOpenEditPost(true)}
-                    className="p-2 rounded-lg hover:bg-gray-100"
+                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800"
                     title="Edit post"
                   >
                     <Pencil size={18} />
@@ -191,7 +191,7 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
                   <button
                     onClick={handleDeletePost}
                     disabled={deletePost.isPending}
-                    className="p-2 rounded-lg hover:bg-gray-100 text-red-600 disabled:opacity-50"
+                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 text-red-600 disabled:opacity-50"
                     title="Delete post"
                   >
                     <Trash2 size={18} />
@@ -203,7 +203,7 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
 
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-gray-100"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800"
                 title="Close"
               >
                 <X size={18} />
@@ -269,7 +269,7 @@ const PostDetailsModal = ({ postId, onClose }: Props) => {
 
                 {/* POST INFORMATION */}
 
-                <div className="p-4 border-b shrink-0">
+                <div className="p-4 border-b dark:border-neutral-800 shrink-0">
 
                   {/* LIKE */}
 

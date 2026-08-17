@@ -83,6 +83,15 @@
   .border-hairline {
     border-width: 0.5px;
   }
+
+  /* Hide scrollbar while keeping scroll functionality (used on Reels) */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* ─────────────────────────────────────────────
@@ -97,4 +106,9 @@
   background: white;
   padding: 2px;
   border-radius: 9999px;
+}
+
+/* Dark mode: story ring inner uses dark bg so it blends with dark cards */
+.dark .story-ring-inner {
+  background: #000;
 }

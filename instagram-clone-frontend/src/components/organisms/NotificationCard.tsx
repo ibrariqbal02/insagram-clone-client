@@ -47,8 +47,8 @@ const NotificationCard = ({ notification, onClick, onDelete }: Props) => {
       onClick={onClick}
       className={`
         flex items-center gap-3 px-4 py-2.5 cursor-pointer
-        active:bg-gray-100 transition
-        ${notification.isRead ? "bg-white" : "bg-blue-50"}
+        active:bg-gray-100 dark:active:bg-neutral-800 transition
+        ${notification.isRead ? "bg-white dark:bg-black" : "bg-blue-50 dark:bg-blue-950"}
       `}
     >
       {/* Avatar */}
@@ -60,7 +60,7 @@ const NotificationCard = ({ notification, onClick, onDelete }: Props) => {
             className="w-11 h-11 rounded-full object-cover"
           />
         ) : (
-          <div className="w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center text-base font-semibold text-gray-500">
+          <div className="w-11 h-11 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-base font-semibold text-gray-500 dark:text-neutral-300">
             {sender?.name?.[0]?.toUpperCase() ?? "?"}
           </div>
         )}
@@ -68,7 +68,7 @@ const NotificationCard = ({ notification, onClick, onDelete }: Props) => {
 
       {/* Text */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-900 leading-snug line-clamp-2">
+        <p className="text-sm text-gray-900 dark:text-neutral-100 leading-snug line-clamp-2">
           <span className="font-semibold">{sender?.username ?? "Someone"}</span>
           {" "}
           {actionText(notification)}
@@ -95,7 +95,7 @@ const NotificationCard = ({ notification, onClick, onDelete }: Props) => {
               e.stopPropagation();
               onDelete();
             }}
-            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 text-gray-400 hover:text-red-500 transition"
+            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 hover:text-red-500 transition"
             aria-label="Delete notification"
           >
             <Trash2 size={17} />

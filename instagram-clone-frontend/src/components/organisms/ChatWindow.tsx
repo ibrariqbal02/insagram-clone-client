@@ -63,10 +63,10 @@ const ChatWindow = ({ conversationId }: Props) => {
   }, [messagesData]);
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex h-full flex-col bg-white dark:bg-black">
 
       {/* ── Header ── */}
-      <div className="border-b border-gray-200 bg-white px-3 md:px-4 flex items-center gap-3 shrink-0" style={{ height: 56 }}>
+      <div className="border-b border-gray-200 dark:border-neutral-800 bg-white dark:bg-black px-3 md:px-4 flex items-center gap-3 shrink-0" style={{ height: 56 }}>
 
         {/* Back (mobile) */}
         <button
@@ -148,7 +148,7 @@ const ChatWindow = ({ conversationId }: Props) => {
       </div>
 
       {/* ── Message list ── */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-2.5 bg-white">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-2.5 bg-white dark:bg-black">
         {messagesLoading ? (
           <div className="flex h-full items-center justify-center text-gray-400 text-sm">
             Loading messages...

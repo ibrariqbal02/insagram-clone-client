@@ -9,9 +9,10 @@ import {
   User,
   LogOut,
   Menu,
+  Settings,
 } from "lucide-react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNotifications } from "../../hooks/useNotification";
 import { useMyProfile } from "../../hooks/useProfile";
@@ -21,7 +22,20 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed,   setCollapsed]   = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close "More" menu when clicking outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setShowMoreMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const { data: notifData } = useNotifications();
   const { data: profileData } = useMyProfile();
@@ -74,7 +88,9 @@ const Sidebar = () => {
       {/* ── Desktop sidebar ─────────────────────────────── */}
       <aside
         className={`
-          hidden lg:flex fixed left-0 top-0 h-screen border-r border-gray-200 bg-white
+          hidden lg:flex fixed left-0 top-0 h-screen
+          border-r border-gray-200 dark:border-neutral-800
+          bg-white dark:bg-black
           flex-col justify-between z-40 transition-all duration-200
           ${isNarrow ? "w-[72px] px-3 py-5" : "w-[245px] px-4 py-5"}
         `}
@@ -119,7 +135,7 @@ const Sidebar = () => {
                 to={path}
                 className={`
                   flex items-center gap-4 rounded-lg py-3 transition-colors
-                  hover:bg-gray-100
+                  hover:bg-gray-100 dark:hover:bg-neutral-900
                   ${isNarrow ? "justify-center px-0" : "px-3"}
                   ${isActive ? "font-semibold" : "font-normal"}
                 `}
@@ -128,7 +144,7 @@ const Sidebar = () => {
                   <Icon
                     size={26}
                     strokeWidth={isActive ? 2.2 : 1.8}
-                    className={isActive ? "text-black" : "text-gray-800"}
+                    className={isActive ? "text-black dark:text-white" : "text-gray-800 dark:text-neutral-300"}
                   />
                   {showBadge && (
                     <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-0.5">
@@ -136,7 +152,7 @@ const Sidebar = () => {
                     </span>
                   )}
                 </span>
-                {!isNarrow && <span className="text-sm">{name}</span>}
+                {!isNarrow && <span className="text-sm dark:text-neutral-200">{name}</span>}
               </NavLink>
             );
           })}
@@ -145,7 +161,8 @@ const Sidebar = () => {
           <NavLink
             to="/profile"
             className={`
-              flex items-center gap-4 rounded-lg py-3 transition-colors hover:bg-gray-100
+              flex items-center gap-4 rounded-lg py-3 transition-colors
+              hover:bg-gray-100 dark:hover:bg-neutral-900
               ${isNarrow ? "justify-center px-0" : "px-3"}
               ${location.pathname.startsWith("/profile") ? "font-semibold" : "font-normal"}
             `}
@@ -157,42 +174,63 @@ const Sidebar = () => {
                   alt="profile"
                   className={`rounded-full object-cover border-2 w-7 h-7 ${
                     location.pathname.startsWith("/profile")
-                      ? "border-black"
+                      ? "border-black dark:border-white"
                       : "border-transparent"
                   }`}
                 />
               ) : (
-                <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
+                <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-xs font-semibold text-gray-600 dark:text-neutral-300">
                   {username?.[0]?.toUpperCase() ?? <User size={16} />}
                 </div>
               )}
             </span>
-            {!isNarrow && <span className="text-sm">Profile</span>}
+            {!isNarrow && <span className="text-sm dark:text-neutral-200">Profile</span>}
           </NavLink>
         </div>
 
-        {/* Bottom: More + Logout */}
-        <div className="flex flex-col gap-1">
-          <button
-            onClick={() => setCollapsed((v) => !v)}
-            className={`
-              flex items-center gap-4 rounded-lg py-3 transition-colors hover:bg-gray-100 w-full
-              ${isNarrow ? "justify-center px-0" : "px-3"}
-            `}
-          >
-            <Menu size={26} strokeWidth={1.8} className="shrink-0 text-gray-800" />
-            {!isNarrow && <span className="text-sm">More</span>}
-          </button>
+        {/* Bottom: More (with popover) */}
+        <div className="flex flex-col gap-1" ref={moreMenuRef}>
+
+          {/* "More" popover menu */}
+          {showMoreMenu && (
+            <div
+              className={`
+                absolute bottom-20
+                bg-white dark:bg-neutral-900
+                border border-gray-200 dark:border-neutral-700
+                rounded-xl shadow-lg z-50 py-2 min-w-[220px]
+                ${isNarrow ? "left-16" : "left-4"}
+              `}
+            >
+              <button
+                onClick={() => { navigate("/settings"); setShowMoreMenu(false); }}
+                className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-800 transition"
+              >
+                <Settings size={20} strokeWidth={1.8} />
+                Settings
+              </button>
+              <div className="border-t border-gray-100 dark:border-neutral-700 my-1" />
+              <button
+                onClick={() => { handleLogout(); setShowMoreMenu(false); }}
+                className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition"
+              >
+                <LogOut size={20} strokeWidth={1.8} />
+                Log out
+              </button>
+            </div>
+          )}
 
           <button
-            onClick={handleLogout}
+            onClick={() => { setCollapsed((v) => !v); setShowMoreMenu((v) => !v); }}
             className={`
-              flex items-center gap-4 rounded-lg py-3 transition-colors hover:bg-red-50 text-red-500 w-full
+              flex items-center gap-4 rounded-lg py-3 transition-colors
+              hover:bg-gray-100 dark:hover:bg-neutral-900 w-full
               ${isNarrow ? "justify-center px-0" : "px-3"}
+              ${showMoreMenu ? "bg-gray-100 dark:bg-neutral-900 font-semibold" : ""}
             `}
           >
-            <LogOut size={26} strokeWidth={1.8} className="shrink-0" />
-            {!isNarrow && <span className="text-sm">Log out</span>}
+            <Menu size={26} strokeWidth={showMoreMenu ? 2.2 : 1.8} className="shrink-0 text-gray-800 dark:text-neutral-300" />
+            {!isNarrow && <span className="text-sm dark:text-neutral-200">More</span>}
           </button>
         </div>
       </aside>
@@ -209,7 +247,8 @@ const Sidebar = () => {
       <nav
         className="
           fixed bottom-0 left-0 right-0 z-50 lg:hidden
-          bg-white border-t border-gray-200
+          bg-white dark:bg-black
+          border-t border-gray-200 dark:border-neutral-800
           flex justify-around items-center
           pl-safe pr-safe
         "
@@ -249,7 +288,7 @@ const Sidebar = () => {
                   <User
                     size={26}
                     strokeWidth={isActive ? 2.2 : 1.8}
-                    className={isActive ? "text-black" : "text-gray-600"}
+                    className={isActive ? "text-black dark:text-white" : "text-gray-600 dark:text-neutral-400"}
                   />
                 )}
               </NavLink>
@@ -268,7 +307,7 @@ const Sidebar = () => {
                 <Icon
                   size={26}
                   strokeWidth={isActive ? 2.2 : 1.8}
-                  className={isActive ? "text-black" : "text-gray-600"}
+                  className={isActive ? "text-black dark:text-white" : "text-gray-600 dark:text-neutral-400"}
                   fill={
                     (name === "Home" || name === "Notifications") && isActive
                       ? "currentColor"

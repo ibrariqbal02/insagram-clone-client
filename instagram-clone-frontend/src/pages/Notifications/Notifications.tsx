@@ -21,11 +21,11 @@ const Notifications = () => {
 
   return (
     <>
-      <div className="bg-white min-h-full">
+      <div className="bg-white dark:bg-black min-h-full">
 
         {/* ── Header ─────────────────────────────── */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 flex items-center" style={{ height: 48 }}>
-          <h1 className="text-base font-semibold text-gray-900">Activity</h1>
+        <div className="sticky top-0 z-10 bg-white dark:bg-black border-b border-gray-100 dark:border-neutral-800 px-4 flex items-center" style={{ height: 48 }}>
+          <h1 className="text-base font-semibold text-gray-900 dark:text-white">Activity</h1>
         </div>
 
         {/* ── Body ───────────────────────────────── */}
@@ -34,20 +34,20 @@ const Notifications = () => {
           <div className="px-4 py-3 space-y-4">
             {[1,2,3,4,5].map(i => (
               <div key={i} className="flex items-center gap-3 animate-pulse">
-                <div className="w-11 h-11 rounded-full bg-gray-200 shrink-0" />
+                <div className="w-11 h-11 rounded-full bg-gray-200 dark:bg-neutral-800 shrink-0" />
                 <div className="flex-1 space-y-1.5">
-                  <div className="h-3 bg-gray-200 rounded w-3/4" />
-                  <div className="h-2.5 bg-gray-100 rounded w-1/2" />
+                  <div className="h-3 bg-gray-200 dark:bg-neutral-800 rounded w-3/4" />
+                  <div className="h-2.5 bg-gray-100 dark:bg-neutral-700 rounded w-1/2" />
                 </div>
-                <div className="w-11 h-11 rounded-sm bg-gray-100 shrink-0" />
+                <div className="w-11 h-11 rounded-sm bg-gray-100 dark:bg-neutral-800 shrink-0" />
               </div>
             ))}
           </div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center px-6">
             <div className="text-5xl mb-4">🔔</div>
-            <p className="font-semibold text-gray-800 mb-1">Activity on your posts</p>
-            <p className="text-sm text-gray-400 leading-snug">
+            <p className="font-semibold text-gray-800 dark:text-white mb-1">Activity on your posts</p>
+            <p className="text-sm text-gray-400 dark:text-neutral-500 leading-snug">
               When someone likes or comments on one of your posts, you'll see it here.
             </p>
           </div>
