@@ -9,6 +9,11 @@ import {
   useSendVoiceMessage,
 } from "../../hooks/useMessage";
 import { useMyProfile } from "../../hooks/useProfile";
+import {
+  useMarkConversationRead,
+  usePresence,
+  useTypingIndicator,
+} from "../../hooks/useSocket";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 
@@ -48,6 +53,15 @@ const ChatWindow = ({ conversationId }: Props) => {
 
   const sendMessage = useSendMessage();
   const sendVoiceMessage = useSendVoiceMessage();
+
+  const { typingUserId, notifyTyping } = useTypingIndicator(conversationId);
+  const isOtherUserOnline = usePresence(!isGroup ? otherUser?._id : undefined);
+  useMarkConversationRead(conversationId, messagesData?.messages?.length ?? 0);
+
+  const typingDisplayName = isGroup
+    ? otherMembers.find((p) => p._id === typingUserId)?.name?.split(" ")[0]
+    : otherUser?.name?.split(" ")[0];
+  const isSomeoneTyping = !!typingUserId && typingUserId !== currentUserId;
 
   const handleSend = (text: string) => {
     if (!text.trim()) return;
@@ -103,15 +117,25 @@ const ChatWindow = ({ conversationId }: Props) => {
               </div>
             ))}
           </div>
-        ) : otherUser?.profilePicture ? (
-          <img
-            src={otherUser.profilePicture}
-            alt={otherUser.name}
-            className="w-10 h-10 rounded-full object-cover shrink-0"
-          />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-semibold shrink-0">
-            {otherUser?.name?.[0]?.toUpperCase() ?? "?"}
+          <div className="relative w-10 h-10 shrink-0">
+            {otherUser?.profilePicture ? (
+              <img
+                src={otherUser.profilePicture}
+                alt={otherUser.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-semibold">
+                {otherUser?.name?.[0]?.toUpperCase() ?? "?"}
+              </div>
+            )}
+            {isOtherUserOnline && (
+              <span
+                title="Online"
+                className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white dark:border-black"
+              />
+            )}
           </div>
         )}
 
@@ -126,12 +150,12 @@ const ChatWindow = ({ conversationId }: Props) => {
                 <Users size={14} className="text-gray-400 shrink-0" />
               </div>
               <p className="text-xs text-gray-500 truncate">
-                {(conversation?.participants?.length ?? 0)} members ·{" "}
-                {otherMembers
-                  .slice(0, 3)
-                  .map((p: any) => p.name?.split(" ")[0])
-                  .join(", ")}
-                {otherMembers.length > 3 ? "…" : ""}
+                {isSomeoneTyping
+                  ? `${typingDisplayName ?? "Someone"} is typing…`
+                  : `${(conversation?.participants?.length ?? 0)} members · ${otherMembers
+                      .slice(0, 3)
+                      .map((p: any) => p.name?.split(" ")[0])
+                      .join(", ")}${otherMembers.length > 3 ? "…" : ""}`}
               </p>
             </>
           ) : (
@@ -139,9 +163,13 @@ const ChatWindow = ({ conversationId }: Props) => {
               <p className="font-semibold leading-tight truncate">
                 {otherUser?.name ?? "Chat"}
               </p>
-              {otherUser?.username && (
-                <p className="text-xs text-gray-500">@{otherUser.username}</p>
-              )}
+              <p className="text-xs text-gray-500 truncate">
+                {isSomeoneTyping ? (
+                  <span className="text-blue-500">typing…</span>
+                ) : otherUser?.username ? (
+                  `@${otherUser.username}`
+                ) : null}
+              </p>
             </>
           )}
         </div>
@@ -164,27 +192,30 @@ const ChatWindow = ({ conversationId }: Props) => {
               </div>
             )}
 
-            {messagesData?.messages?.map((message: any) => (
-              <MessageBubble
-                key={message._id}
-                message={message}
-                conversationId={conversationId}
-                isMine={
-                  message._optimistic === true ||
-                  message.sender?._id === currentUserId ||
-                  message.sender === currentUserId
-                }
-                // In group chats show the sender's name above their bubble
-                showSenderName={
-                  isGroup &&
-                  !(
-                    message._optimistic === true ||
-                    message.sender?._id === currentUserId ||
-                    message.sender === currentUserId
-                  )
-                }
-              />
-            ))}
+            {messagesData?.messages?.map((message: any, index: number) => {
+              const isMine =
+                message._optimistic === true ||
+                message.sender?._id === currentUserId ||
+                message.sender === currentUserId;
+
+              // "Seen" only shows under the most recent message I sent.
+              const isLastMine =
+                isMine &&
+                !isGroup &&
+                index === (messagesData?.messages?.length ?? 0) - 1;
+
+              return (
+                <MessageBubble
+                  key={message._id}
+                  message={message}
+                  conversationId={conversationId}
+                  isMine={isMine}
+                  // In group chats show the sender's name above their bubble
+                  showSenderName={isGroup && !isMine}
+                  showSeen={isLastMine && message.isRead === true}
+                />
+              );
+            })}
           </>
         )}
         <div ref={bottomRef} />
@@ -194,6 +225,7 @@ const ChatWindow = ({ conversationId }: Props) => {
       <MessageInput
         onSend={handleSend}
         onSendVoice={handleSendVoice}
+        onTyping={notifyTyping}
         loading={sendMessage.isPending}
         voiceLoading={sendVoiceMessage.isPending}
       />

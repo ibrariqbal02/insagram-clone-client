@@ -5,6 +5,11 @@ import userEvent from "@testing-library/user-event";
 import ChatWindow from "../../src/components/organisms/ChatWindow";
 import { useMessages, useSendMessage } from "../../src/hooks/useMessage";
 import { useMyProfile } from "../../src/hooks/useProfile";
+import {
+  useTypingIndicator,
+  usePresence,
+  useMarkConversationRead,
+} from "../../src/hooks/useSocket";
 import { useQueryClient } from "@tanstack/react-query";
 
 
@@ -15,6 +20,12 @@ jest.mock("../../src/hooks/useMessage", () => ({
 
 jest.mock("../../src/hooks/useProfile", () => ({
   useMyProfile: jest.fn(),
+}));
+
+jest.mock("../../src/hooks/useSocket", () => ({
+  useTypingIndicator: jest.fn(),
+  usePresence: jest.fn(),
+  useMarkConversationRead: jest.fn(),
 }));
 
 
@@ -81,6 +92,14 @@ describe("ChatWindow Component", () => {
     (useQueryClient as jest.Mock).mockReturnValue({
       getQueryData: mockGetQueryData,
     });
+
+    (useTypingIndicator as jest.Mock).mockReturnValue({
+      typingUserId: null,
+      notifyTyping: jest.fn(),
+    });
+
+    (usePresence as jest.Mock).mockReturnValue(false);
+    (useMarkConversationRead as jest.Mock).mockReturnValue(undefined);
   });
 
   const conversationId = "conv-123";

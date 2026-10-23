@@ -5,11 +5,12 @@ import VoiceRecorder from "./VoiceRecorder";
 type Props = {
   onSend: (text: string) => void;
   onSendVoice: (blob: Blob) => void;
+  onTyping?: () => void;
   loading: boolean;
   voiceLoading: boolean;
 };
 
-const MessageInput = ({ onSend, onSendVoice, loading, voiceLoading }: Props) => {
+const MessageInput = ({ onSend, onSendVoice, onTyping, loading, voiceLoading }: Props) => {
   const [text, setText] = useState("");
   const [showRecorder, setShowRecorder] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +60,10 @@ const MessageInput = ({ onSend, onSendVoice, loading, voiceLoading }: Props) => 
       <input
         ref={inputRef}
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => {
+          setText(e.target.value);
+          onTyping?.();
+        }}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();

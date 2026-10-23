@@ -14,11 +14,14 @@ import {
 } from "../services/message.service";
 
 // ─── Polling intervals ────────────────────────────────────────────────────────
-// Messages poll every 1 s while the tab is active; pauses automatically when
-// the user switches away (refetchIntervalInBackground: false is the default).
-const MESSAGES_POLL_MS = 1000;
-// Conversation list (sidebar) only needs to update every 3 s.
-const CONVERSATIONS_POLL_MS = 3000;
+// Socket.IO (see useChatSocket) pushes new messages/edits/deletes in real
+// time, so polling here is just a fallback for missed events (e.g. a brief
+// socket disconnect) — it can be much slower than before. Pauses
+// automatically when the user switches away (refetchIntervalInBackground:
+// false is the default).
+const MESSAGES_POLL_MS = 15000;
+// Conversation list (sidebar) fallback poll.
+const CONVERSATIONS_POLL_MS = 20000;
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
 

@@ -10,6 +10,12 @@ jest.mock("../../src/hooks/useAuth", () => ({
   useMe: jest.fn(),
 }));
 
+// ProtectedRoute connects the chat socket for any authenticated route —
+// irrelevant to auth-gating behavior, so stub it out here.
+jest.mock("../../src/hooks/useSocket", () => ({
+  useChatSocket: jest.fn(),
+}));
+
 describe("ProtectedRoute Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
