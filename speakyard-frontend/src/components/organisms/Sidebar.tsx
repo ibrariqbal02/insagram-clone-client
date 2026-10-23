@@ -1,11 +1,7 @@
 import {
   Home,
-  Search,
-  Compass,
-  Film,
+  Phone,
   MessageCircle,
-  Heart,
-  PlusSquare,
   User,
   LogOut,
   Menu,
@@ -14,7 +10,6 @@ import {
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNotifications } from "../../hooks/useNotification";
 import { useMyProfile } from "../../hooks/useProfile";
 import api from "../../api/axios";
 
@@ -37,11 +32,7 @@ const Sidebar = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const { data: notifData } = useNotifications();
   const { data: profileData } = useMyProfile();
-
-  const unreadCount =
-    notifData?.notifications?.filter((n: any) => !n.isRead).length ?? 0;
 
   const profilePicture = profileData?.user?.profilePicture;
   const username = profileData?.user?.username;
@@ -60,26 +51,22 @@ const Sidebar = () => {
   const isMessages = location.pathname.startsWith("/messages");
   const isNarrow = collapsed || isMessages;
 
-  // Desktop sidebar nav — matches real Instagram's order exactly
+  // Simplified MVP nav (Phase 2.3): Home (Practice), Calls, Messages, Profile.
+  // Posts/reels/search/notifications are hidden here but their routes and
+  // pages still exist, reachable directly by URL.
   const navItems = [
     { name: "Home",          icon: Home,          path: "/" },
-    { name: "Search",        icon: Search,        path: "/search" },
-    { name: "Explore",       icon: Compass,       path: "/search" },
-    { name: "Reels",         icon: Film,          path: "/reels" },
+    { name: "Calls",         icon: Phone,         path: "/calls" },
     { name: "Messages",      icon: MessageCircle, path: "/messages" },
-    { name: "Notifications", icon: Heart,         path: "/notification" },
-    { name: "Create",        icon: PlusSquare,    path: "/create-post" },
   ];
 
   // ─────────────────────────────────────────────────────────
-  // Mobile bottom tab — 6 icons (real Instagram has messages too)
+  // Mobile bottom tab
   // ─────────────────────────────────────────────────────────
   const mobileTabItems = [
     { name: "Home",          icon: Home,          path: "/" },
-    { name: "Search",        icon: Search,        path: "/search" },
-    { name: "Create",        icon: PlusSquare,    path: "/create-post" },
+    { name: "Calls",         icon: Phone,         path: "/calls" },
     { name: "Messages",      icon: MessageCircle, path: "/messages" },
-    { name: "Notifications", icon: Heart,         path: "/notification" },
     { name: "Profile",       icon: null,          path: "/profile" },
   ];
 
@@ -116,7 +103,7 @@ const Sidebar = () => {
               </svg>
             ) : (
               <span className="font-logo text-3xl leading-none select-none">
-                Instagram
+                Speakyard
               </span>
             )}
           </div>
@@ -127,7 +114,6 @@ const Sidebar = () => {
               path === "/"
                 ? location.pathname === "/"
                 : location.pathname.startsWith(path);
-            const showBadge = name === "Notifications" && unreadCount > 0;
 
             return (
               <NavLink
@@ -146,11 +132,6 @@ const Sidebar = () => {
                     strokeWidth={isActive ? 2.2 : 1.8}
                     className={isActive ? "text-black dark:text-white" : "text-gray-800 dark:text-neutral-300"}
                   />
-                  {showBadge && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-0.5">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
                 </span>
                 {!isNarrow && <span className="text-sm dark:text-neutral-200">{name}</span>}
               </NavLink>
@@ -237,12 +218,11 @@ const Sidebar = () => {
 
       {/* ── Mobile bottom tab bar ────────────────────────── */}
       {/*
-        Real Instagram bottom bar:
-          - Pure white background
-          - 0.5 px top border
-          - 6 equally-spaced icons (Home, Search, Create, Messages, Notifications, Profile)
-          - Active icon is full black / filled; inactive is outlined gray
-          - Bottom padding = safe-area-inset-bottom (home indicator space)
+        - Pure white background
+        - 0.5 px top border
+        - 4 equally-spaced icons (Home, Calls, Messages, Profile)
+        - Active icon is full black / filled; inactive is outlined gray
+        - Bottom padding = safe-area-inset-bottom (home indicator space)
       */}
       <nav
         className="
@@ -262,8 +242,6 @@ const Sidebar = () => {
             path === "/"
               ? location.pathname === "/"
               : location.pathname.startsWith(path);
-
-          const showBadge = name === "Notifications" && unreadCount > 0;
 
           // Profile tab — show avatar when available
           if (name === "Profile") {
@@ -302,23 +280,13 @@ const Sidebar = () => {
               className="relative flex items-center justify-center w-12 h-12"
               aria-label={name}
             >
-              {/* Create post — Instagram uses a slightly different box icon */}
               {Icon && (
                 <Icon
                   size={26}
                   strokeWidth={isActive ? 2.2 : 1.8}
                   className={isActive ? "text-black dark:text-white" : "text-gray-600 dark:text-neutral-400"}
-                  fill={
-                    (name === "Home" || name === "Notifications") && isActive
-                      ? "currentColor"
-                      : "none"
-                  }
+                  fill={name === "Home" && isActive ? "currentColor" : "none"}
                 />
-              )}
-              {showBadge && (
-                <span className="absolute top-1.5 right-1.5 min-w-[14px] h-3.5 rounded-full bg-red-500 text-white text-[8px] font-bold flex items-center justify-center px-0.5 leading-none">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
               )}
             </NavLink>
           );

@@ -34,6 +34,10 @@ describe("ProtectedRoute Component", () => {
               path="/protected"
               element={<div data-testid="protected-content">Protected Content</div>}
             />
+            <Route
+              path="/onboarding"
+              element={<div data-testid="onboarding-page">Onboarding Page</div>}
+            />
           </Route>
         </Routes>
       </MemoryRouter>
@@ -89,12 +93,13 @@ describe("ProtectedRoute Component", () => {
   /* ==========================================
      3. Authenticated Access
   ========================================== */
-  it("renders nested Outlet child route when user is authenticated", () => {
+  it("renders nested Outlet child route when user is authenticated and onboarded", () => {
     (useMe as jest.Mock).mockReturnValue({
       data: {
         user: {
           _id: "user-123",
           username: "johndoe",
+          onboardingCompleted: true,
         },
       },
       isLoading: false,
@@ -105,5 +110,45 @@ describe("ProtectedRoute Component", () => {
 
     expect(screen.getByTestId("protected-content")).toBeInTheDocument();
     expect(screen.queryByTestId("login-page")).not.toBeInTheDocument();
+  });
+
+  /* ==========================================
+     4. Onboarding redirect
+  ========================================== */
+  it("redirects to /onboarding when the authenticated user hasn't completed it", () => {
+    (useMe as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          _id: "user-123",
+          username: "johndoe",
+          onboardingCompleted: false,
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter();
+
+    expect(screen.getByTestId("onboarding-page")).toBeInTheDocument();
+    expect(screen.queryByTestId("protected-content")).not.toBeInTheDocument();
+  });
+
+  it("does not redirect loop when already on /onboarding", () => {
+    (useMe as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          _id: "user-123",
+          username: "johndoe",
+          onboardingCompleted: false,
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithRouter(["/onboarding"]);
+
+    expect(screen.getByTestId("onboarding-page")).toBeInTheDocument();
   });
 });

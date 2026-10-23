@@ -6,6 +6,10 @@ import PageSpinner from "../components/ui/PageSpinner";
 const Login          = lazy(() => import("../pages/Login/Login"));
 const Register       = lazy(() => import("../pages/Register/Register"));
 const ForgotPassword = lazy(() => import("../pages/ForgotPassword/ForgotPassword"));
+const Onboarding     = lazy(() => import("../pages/Onboarding/Onboarding"));
+const Practice       = lazy(() => import("../pages/Practice/Practice"));
+const Calls          = lazy(() => import("../pages/Calls/Calls"));
+// Old Instagram-style feed — kept, just no longer linked from navigation (Phase 2.3).
 const Home           = lazy(() => import("../pages/Home/Home"));
 const CreatePost     = lazy(() => import("../pages/CreatePost/CreatePost"));
 const Profile        = lazy(() => import("../pages/Profile/Profile"));
@@ -27,8 +31,13 @@ const AppRoutes = () => {
           <Route path="/forgot-password"  element={<ForgotPassword />} />
 
           <Route element={<ProtectedRoute />}>
+            {/* Onboarding runs full-screen, without the nav chrome */}
+            <Route path="/onboarding"                  element={<Onboarding />} />
+
             <Route element={<MainLayout />}>
-              <Route path="/"                          element={<Home />} />
+              {/* Simplified MVP nav (Phase 2.3): Home (Practice), Calls, Messages, Profile */}
+              <Route path="/"                          element={<Practice />} />
+              <Route path="/calls"                     element={<Calls />} />
               <Route path="/create-post"               element={<CreatePost />} />
               {/* Profile — own profile has no param, visiting another user uses :userId */}
               <Route path="/profile"                   element={<Profile />} />
@@ -42,7 +51,8 @@ const AppRoutes = () => {
               <Route path="/messages/:conversationId"  element={<Messages />} />
               {/* Archive */}
               <Route path="/archive"                   element={<Archive />} />
-              {/* Reels */}
+              {/* Posts/reels: hidden from navigation (Phase 2.3) but code and routes kept */}
+              <Route path="/feed"                      element={<Home />} />
               <Route path="/reels"                     element={<Reels />} />
               {/* Settings */}
               <Route path="/settings"                  element={<Settings />} />

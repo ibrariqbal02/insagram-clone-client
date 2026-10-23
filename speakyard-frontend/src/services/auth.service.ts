@@ -80,3 +80,16 @@ export const updatePrivacy = async (isPrivate: boolean) => {
   return response.data;
 };
 
+export type OnboardingData = {
+  nativeLanguages: string[];
+  learningLanguages: { code: string; level: string }[];
+  country?: string;
+  interests?: string[];
+  birthYear?: number | null;
+};
+
+export const completeOnboarding = async (data: OnboardingData) => {
+  const response = await api.patch("/auth/onboarding", data);
+  return response.data;
+};
+

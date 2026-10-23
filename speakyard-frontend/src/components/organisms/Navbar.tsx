@@ -77,7 +77,7 @@ const Navbar = () => {
           className="font-logo text-[28px] leading-none select-none text-gray-900 dark:text-white"
           style={{ paddingTop: 2 }}
         >
-          Instagram
+          Speakyard
         </Link>
 
         {/* Inline search — md tablets only */}

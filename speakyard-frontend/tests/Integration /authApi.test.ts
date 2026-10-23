@@ -11,7 +11,8 @@ import {
   forgotPassword,
   resetPassword,
   deleteAccount,
-} from "../../src/services/auth.service"; 
+  completeOnboarding,
+} from "../../src/services/auth.service";
 
 
 jest.mock("../../src/api/axios", () => ({
@@ -161,6 +162,23 @@ describe("Auth API Service", () => {
     const result = await deleteAccount();
 
     expect(api.delete).toHaveBeenCalledWith("/auth/delete-account");
+    expect(result).toEqual(mockResponse.data);
+  });
+
+  it("completeOnboarding calls PATCH /auth/onboarding with payload", async () => {
+    const mockPayload = {
+      nativeLanguages: ["en"],
+      learningLanguages: [{ code: "es", level: "A1" }],
+      country: "Canada",
+      interests: ["Travel"],
+      birthYear: 2000,
+    };
+    const mockResponse = { data: { success: true, message: "Onboarding completed." } };
+    (api.patch as jest.MockedFunction<typeof api.patch>).mockResolvedValue(mockResponse);
+
+    const result = await completeOnboarding(mockPayload);
+
+    expect(api.patch).toHaveBeenCalledWith("/auth/onboarding", mockPayload);
     expect(result).toEqual(mockResponse.data);
   });
 });

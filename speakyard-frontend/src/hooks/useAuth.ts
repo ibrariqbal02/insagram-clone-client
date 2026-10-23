@@ -77,6 +77,19 @@ export const useResetPassword = () => {
   });
 };
 
+export const useCompleteOnboarding = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: authService.completeOnboarding,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+  });
+};
+
 export const useDeleteAccount = () => {
   const queryClient = useQueryClient();
 

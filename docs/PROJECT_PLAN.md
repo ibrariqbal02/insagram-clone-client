@@ -111,9 +111,9 @@ Phase 1 priority order for the MVP: 1.11–1.13 (sockets, needed for calls) → 
 
 ### 2A Brand, profile and onboarding
 - [ ] 2.0 Rebrand to Speakyard: remove every "Instagram" name/logo/wording, new logo + favicon + app title, colors, meta tags, README
-- [ ] 2.1 User fields: nativeLanguages, learningLanguages [{ code, level A1–C2 }], country, interests, birth year (18+ for calls with strangers)
-- [ ] 2.2 Onboarding screens after register: pick languages and level, goals, mic/camera permission
-- [ ] 2.3 Navigation: Home (Practice), Messages, Calls, Profile (+ Explore kept). Hide reels/create post from main nav, keep code
+- [x] 2.1 User fields: nativeLanguages, learningLanguages [{ code, level A1–C2 }], country, interests, birth year (18+ for calls with strangers)
+- [x] 2.2 Onboarding screens after register: pick languages and level, goals, mic/camera permission (mic only so far — see Log)
+- [ ] 2.3 Navigation: Home (Practice), Messages, Calls, Profile (+ Explore kept). Hide reels/create post from main nav, keep code (built differently this session — see Log, needs reconciling)
 
 ### 2B Human calls (LiveKit)
 - [ ] 2.9 LiveKit: server endpoint creates room + access token (only participants allowed); client LiveKit SDK; env vars
@@ -185,4 +185,51 @@ Order of work: see `docs/COMMANDS.md`.
     coverage for this work lives in `tests/Integration /useSocket.test.ts` (hooks, mocking
     `src/lib/socket.ts`) and the backend's `tests/unit/socket.test.ts` +
     `tests/integration/socket.test.ts` (real Socket.IO server + `socket.io-client`, real DB).
+- 2026-10-24: Monorepo note — github.com/ibrariqbal02/speakyard (backend/ + frontend/speakyard-frontend/)
+  was a stale pre-hardening snapshot; synced it to a `assistant/tender-curie-l8kmyp` branch there with the
+  full current state through 1.13 (full replace, not merged to its `main`). The split repos
+  (insagram-clone-server / insagram-clone-client) remain the ones this plan and project notes files track.
+  The frontend's working folder is now `speakyard-frontend/` (renamed from `instagram-clone-frontend/`)
+  to match that monorepo's naming; `frontend/project notes` and this file were updated to match, but
+  `backend/project notes`'s note about the client's folder name is still stale (one line, not fixed yet).
 - 2026-10-24: Domain speakyard.net bought. Scope now includes video and group calls and rebrand (2.0). Added docs/COMMANDS.md with the ordered commands.
+- 2026-10-24: Phase 2.1–2.2 done, 2.3 built but **diverges from the plan text above** — this session
+  started from "do 2.1-2.3" against the plan as it read *before* the domain/rebrand/COMMANDS.md commit
+  landed (same day, different session — COMMANDS.md's own "only one assistant session on the branch at a
+  time" rule wasn't followed here). Flagging rather than silently reconciling:
+  - Server: `User.model.ts` gained `nativeLanguages` ([String]), `learningLanguages`
+    ([{ code, level: A1-C2 }]), `country`, `interests` ([String]), `birthYear` (number, nullable),
+    and `onboardingCompleted` (bool, default false — existing users read back `false` via Mongoose's
+    schema default even though the field isn't in their stored document yet, so no migration was
+    needed). New `PATCH /api/auth/onboarding` (`completeOnboarding` in `auth.controller.ts`) saves all
+    of these in one call and sets `onboardingCompleted = true`; validated in `auth.routes.ts`
+    (`onboardingRules`) with express-validator — at least one native language, at least one
+    `{code, level}` learning language with a valid CEFR level, and (if a birth year is given) age 18+.
+    Matches 2.1 as written either way.
+  - Client onboarding: new `src/pages/Onboarding/Onboarding.tsx` — a 5-step flow (native languages →
+    learning language+level → country/interests → birth year → **mic-only** permission via
+    `navigator.mediaDevices.getUserMedia`) that posts to the new endpoint via
+    `useCompleteOnboarding` (`useAuth.ts`) and redirects to `/`. `ProtectedRoute.tsx` now redirects any
+    authenticated user with `onboardingCompleted !== true` to `/onboarding` (skipped if already there,
+    no loop). Language/level/interest option lists live in `src/data/languages.ts`, shared by
+    Onboarding and the new Practice page. **Gap vs. 2.2 as now written:** no camera permission request
+    yet — add it once video calls (2.10+) exist.
+  - Client nav: simplified `Sidebar.tsx` (desktop nav + mobile tab) to exactly Home, Calls, Messages,
+    Profile — **no Explore/Search item**, and hid Search/Notifications/Create-post/Reels from nav, not
+    just Reels/Create-post. The old Notifications/Search/Reels/Create-post badge and fill-icon logic
+    tied to those removed nav items was deleted as dead code. Nothing was deleted: Search,
+    Notifications, Create post, Archive, Settings, and the old feed (moved `/` → `/feed`) all still
+    have working routes in `AppRoutes.tsx`, just unlinked from nav. `/` renders a new
+    `src/pages/Practice/Practice.tsx` placeholder (AI practice partner is 2.4-2.8, not built yet) and
+    `/calls` a new `src/pages/Calls/Calls.tsx` empty-state placeholder (human calls are 2.9-2.15).
+    Also fixed the nav/mobile-header wordmark, which still said "Instagram", to "Speakyard" (full
+    rebrand is the separate 2.0, not done). **To reconcile:** either add an Explore nav item back
+    (pointing at the existing `/search` page) and restore Notifications to nav to match 2.3 as now
+    worded, or treat the stricter 4-item nav as the real decision and edit 2.3's wording instead —
+    whoever picks this up next should choose one and update this file.
+  - Tests: backend `tests/integration/onboarding.controller.test.ts` (controller unit tests + real
+    supertest+express-validator checks for the validation rules). Client: `Onboarding.test.tsx` (full
+    5-step flow incl. validation and the under-18 block), `Practice.test.tsx`, `Calls.test.tsx`, new
+    `ProtectedRoute.test.tsx` cases for the onboarding redirect, and an `authApi.test.ts` case for
+    `completeOnboarding`. No new regressions: same pre-existing 6 backend / 11 frontend failing suites
+    as before this change (confirmed by re-running the full suite before and after).
