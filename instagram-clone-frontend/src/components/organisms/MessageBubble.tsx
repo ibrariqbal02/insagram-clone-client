@@ -7,9 +7,16 @@ type Props = {
   isMine: boolean;
   conversationId: string;
   showSenderName?: boolean;
+  showSeen?: boolean;
 };
 
-const MessageBubble = ({ message, isMine, conversationId: _conversationId, showSenderName = false }: Props) => {
+const MessageBubble = ({
+  message,
+  isMine,
+  conversationId: _conversationId,
+  showSenderName = false,
+  showSeen = false,
+}: Props) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(message.content ?? "");
@@ -203,6 +210,10 @@ const MessageBubble = ({ message, isMine, conversationId: _conversationId, showS
           </>
         )}
       </div>
+
+      {showSeen && (
+        <p className="text-[11px] text-gray-400 mt-0.5 px-1">Seen</p>
+      )}
     </div>
   );
 };
