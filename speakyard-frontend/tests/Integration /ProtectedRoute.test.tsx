@@ -56,7 +56,7 @@ describe("ProtectedRoute Component", () => {
 
     renderWithRouter();
 
-    expect(screen.getByText(/loading\.\.\./i)).toBeInTheDocument();
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
     expect(screen.queryByTestId("protected-content")).not.toBeInTheDocument();
     expect(screen.queryByTestId("login-page")).not.toBeInTheDocument();
   });

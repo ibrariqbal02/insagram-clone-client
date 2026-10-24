@@ -19,14 +19,14 @@ const Messages = () => {
      * On mobile: single column, list hides when a chat is open.
      * On desktop: 3-col grid (list | chat).
      */
-    <div className="h-full overflow-hidden bg-white lg:rounded-xl lg:shadow">
-      <div className="grid grid-cols-1 lg:grid-cols-3 h-full">
+    <div className="h-full overflow-hidden bg-white md:rounded-xl md:shadow">
+      <div className="grid grid-cols-1 md:grid-cols-3 h-full">
 
         {/* ── Conversation list ─────────────────────── */}
         <div
           className={`
             flex flex-col h-full overflow-hidden border-r border-gray-200
-            ${conversationId ? "hidden lg:flex" : "flex"}
+            ${conversationId ? "hidden md:flex" : "flex"}
           `}
         >
           {/* Header */}
@@ -37,16 +37,15 @@ const Messages = () => {
             "
             style={{ height: 56 }}
           >
-            {/* Username as "inbox owner" — matches real Instagram DM header */}
-            <h2 className="text-base font-semibold text-gray-900 leading-none">
-              Direct
+            <h2 className="text-base font-extrabold text-gray-900 leading-none">
+              Messages
             </h2>
 
             <div className="flex items-center gap-0.5">
               {/* New group */}
               <button
                 onClick={() => setOpenGroupModal(true)}
-                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition text-gray-800"
+                className="flex items-center justify-center w-11 h-11 rounded-full hover:bg-gray-100 transition text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
                 aria-label="New group chat"
               >
                 <Users size={22} strokeWidth={1.8} />
@@ -55,7 +54,7 @@ const Messages = () => {
               {/* New DM */}
               <button
                 onClick={() => setOpenDMModal(true)}
-                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition text-gray-800"
+                className="flex items-center justify-center w-11 h-11 rounded-full hover:bg-gray-100 transition text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
                 aria-label="New message"
               >
                 <SquarePen size={22} strokeWidth={1.8} />
@@ -70,8 +69,8 @@ const Messages = () => {
         {/* ── Chat window ───────────────────────────── */}
         <div
           className={`
-            lg:col-span-2 h-full overflow-hidden
-            ${conversationId ? "block" : "hidden lg:block"}
+            md:col-span-2 h-full overflow-hidden
+            ${conversationId ? "block" : "hidden md:block"}
           `}
         >
           {conversationId ? (
@@ -79,18 +78,18 @@ const Messages = () => {
           ) : (
             /* Desktop empty state */
             <div className="h-full flex flex-col items-center justify-center text-center px-8">
-              <div className="w-16 h-16 rounded-full border-2 border-gray-900 flex items-center justify-center mb-4">
-                <SquarePen size={28} strokeWidth={1.5} className="text-gray-900" />
+              <div className="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center mb-4">
+                <SquarePen size={26} strokeWidth={1.8} className="text-brand-700" />
               </div>
-              <p className="font-semibold text-gray-900 mb-1">Your messages</p>
-              <p className="text-sm text-gray-400 mb-4">
-                Send private photos and messages to a friend or group.
+              <p className="font-bold text-gray-900 mb-1">Your messages</p>
+              <p className="text-sm text-gray-500 mb-5 max-w-xs leading-relaxed">
+                Start a conversation with a practice partner — writing is great practice too.
               </p>
               <button
                 onClick={() => setOpenDMModal(true)}
-                className="bg-[#0095f6] hover:bg-[#1877f2] text-white text-sm font-semibold rounded-lg px-4 py-2 transition"
+                className="bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl px-5 min-h-[44px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
               >
-                Send message
+                New message
               </button>
             </div>
           )}

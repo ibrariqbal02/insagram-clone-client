@@ -16,9 +16,14 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
 }));
 
-describe("Onboarding Component", () => {
+const mockShowToast = jest.fn();
+jest.mock("../../src/components/ui/Toast", () => ({
+  useToast: () => ({ showToast: mockShowToast }),
+}));
+
+describe("Onboarding (English only)", () => {
   const mockMutate = jest.fn<
-    (data: unknown, options?: { onSuccess?: () => void; onError?: (error: unknown) => void }) => void
+    (data: unknown, options?: { onSuccess?: () => void }) => void
   >();
 
   beforeEach(() => {
@@ -31,121 +36,84 @@ describe("Onboarding Component", () => {
       error: null,
     });
 
-    // jsdom has no real media devices implementation
     Object.defineProperty(navigator, "mediaDevices", {
-      value: {
-        getUserMedia: jest.fn<(...args: any[]) => Promise<any>>(),
-      },
+      value: { getUserMedia: jest.fn<(...args: any[]) => Promise<any>>() },
       configurable: true,
     });
   });
 
-  const renderOnboarding = () => {
-    return render(
+  const renderOnboarding = () =>
+    render(
       <BrowserRouter>
         <Onboarding />
       </BrowserRouter>
     );
-  };
 
-  it("shows a validation error if Next is clicked with no native language picked", async () => {
+  it("never asks which language the user wants to learn", async () => {
     const user = userEvent.setup();
     renderOnboarding();
 
-    expect(screen.getByText(/what languages do you speak/i)).toBeInTheDocument();
+    expect(screen.getByText(/what language do you speak/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /next/i }));
+    await user.click(screen.getByRole("button", { name: "Spanish" }));
+    await user.click(screen.getByRole("button", { name: /continue/i }));
 
-    expect(screen.getByText(/pick at least one language you speak/i)).toBeInTheDocument();
-    expect(screen.getByText(/what languages do you speak/i)).toBeInTheDocument();
+    // Step 2 is the English level, not a language picker
+    expect(screen.getByText(/how good is your english/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/language to practice/i)).not.toBeInTheDocument();
   });
 
-  it("advances to the learning-language step once a native language is picked", async () => {
+  it("shows plain-English descriptions for each level", async () => {
     const user = userEvent.setup();
     renderOnboarding();
 
-    await user.click(screen.getByRole("button", { name: "English" }));
-    await user.click(screen.getByRole("button", { name: /next/i }));
+    await user.click(screen.getByRole("button", { name: "Spanish" }));
+    await user.click(screen.getByRole("button", { name: /continue/i }));
 
-    expect(screen.getByText(/what are you learning/i)).toBeInTheDocument();
+    expect(screen.getByText(/i know a few words and short phrases/i)).toBeInTheDocument();
+    expect(screen.getByText(/i can hold a basic conversation/i)).toBeInTheDocument();
   });
 
-  it("requires at least one learning language before advancing", async () => {
+  it("blocks each step until an answer is picked", async () => {
     const user = userEvent.setup();
     renderOnboarding();
 
-    await user.click(screen.getByRole("button", { name: "English" }));
-    await user.click(screen.getByRole("button", { name: /next/i }));
+    await user.click(screen.getByRole("button", { name: /continue/i }));
+    expect(screen.getByText(/pick the language you speak best/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /next/i }));
+    await user.click(screen.getByRole("button", { name: "Spanish" }));
+    await user.click(screen.getByRole("button", { name: /continue/i }));
 
-    expect(
-      screen.getByText(/add at least one language you want to practice/i)
-    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /continue/i }));
+    expect(screen.getByText(/choose the level that sounds most like you/i)).toBeInTheDocument();
   });
 
-  it("blocks a birth year that would make the user under 18", async () => {
+  it("submits native language, English level and goal", async () => {
     const user = userEvent.setup();
+    mockMutate.mockImplementation((_data, options) => options?.onSuccess?.());
+
     renderOnboarding();
 
-    // Step 1: native language
-    await user.click(screen.getByRole("button", { name: "English" }));
-    await user.click(screen.getByRole("button", { name: /next/i }));
+    // Native language
+    await user.click(screen.getByRole("button", { name: "Spanish" }));
+    await user.click(screen.getByRole("button", { name: /continue/i }));
 
-    // Step 2: learning language
-    await user.selectOptions(screen.getByLabelText(/language to practice/i), "es");
-    await user.click(screen.getByRole("button", { name: /^add$/i }));
-    await user.click(screen.getByRole("button", { name: /next/i }));
+    // English level
+    await user.click(screen.getByRole("button", { name: /B1 Intermediate/i }));
+    await user.click(screen.getByRole("button", { name: /continue/i }));
 
-    // Step 3: country/interests — skip
-    await user.click(screen.getByRole("button", { name: /next/i }));
+    // Goal
+    await user.click(screen.getByRole("button", { name: /travel/i }));
+    await user.click(screen.getByRole("button", { name: /continue/i }));
 
-    // Step 4: birth year — too young
-    const underageYear = new Date().getFullYear() - 10;
-    await user.type(screen.getByLabelText(/birth year/i), String(underageYear));
-    await user.click(screen.getByRole("button", { name: /next/i }));
-
-    expect(screen.getByText(/at least 18 years old/i)).toBeInTheDocument();
-    expect(mockMutate).not.toHaveBeenCalled();
-  });
-
-  it("completes the full flow and submits the expected payload", async () => {
-    const user = userEvent.setup();
-    mockMutate.mockImplementation((_data, options) => {
-      options?.onSuccess?.();
-    });
-    renderOnboarding();
-
-    // Step 1: native language
-    await user.click(screen.getByRole("button", { name: "English" }));
-    await user.click(screen.getByRole("button", { name: /next/i }));
-
-    // Step 2: learning language
-    await user.selectOptions(screen.getByLabelText(/language to practice/i), "es");
-    await user.selectOptions(screen.getByLabelText(/your level/i), "B1");
-    await user.click(screen.getByRole("button", { name: /^add$/i }));
-    expect(screen.getByRole("listitem")).toHaveTextContent("Spanish");
-    await user.click(screen.getByRole("button", { name: /next/i }));
-
-    // Step 3: country + interests
-    await user.type(screen.getByLabelText(/country/i), "Canada");
-    await user.click(screen.getByRole("button", { name: "Travel" }));
-    await user.click(screen.getByRole("button", { name: /next/i }));
-
-    // Step 4: birth year — valid adult
-    await user.type(screen.getByLabelText(/birth year/i), "2000");
-    await user.click(screen.getByRole("button", { name: /next/i }));
-
-    // Step 5: mic permission — skip straight to finish
-    await user.click(screen.getByRole("button", { name: /finish/i }));
+    // Mic step → finish
+    await user.click(screen.getByRole("button", { name: /start practising/i }));
 
     expect(mockMutate).toHaveBeenCalledWith(
       {
-        nativeLanguages: ["en"],
-        learningLanguages: [{ code: "es", level: "B1" }],
-        country: "Canada",
-        interests: ["Travel"],
-        birthYear: 2000,
+        nativeLanguages: ["es"],
+        learningLanguages: [{ code: "en", level: "B1" }],
+        goal: "travel",
       },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );

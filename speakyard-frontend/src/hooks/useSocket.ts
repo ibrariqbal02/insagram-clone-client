@@ -92,6 +92,25 @@ export const useChatSocket = (currentUserId?: string) => {
   }, [currentUserId, queryClient]);
 };
 
+// Refreshes the "People to practice with" list whenever someone comes
+// online or goes offline.
+export const useOnlinePartnersSync = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    const handlePresenceUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ["online-partners"] });
+    };
+
+    socket.on("presence:update", handlePresenceUpdate);
+    return () => {
+      socket.off("presence:update", handlePresenceUpdate);
+    };
+  }, [queryClient]);
+};
+
 // Per-conversation typing indicator, scoped to the open ChatWindow.
 export const useTypingIndicator = (conversationId: string) => {
   const [typingUserId, setTypingUserId] = useState<string | null>(null);

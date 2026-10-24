@@ -217,7 +217,7 @@ const VoiceRecorder = ({ onSend, onCancel, loading }: Props) => {
             onClick={handleSend}
             disabled={loading}
             title="Send voice message"
-            className="shrink-0 rounded-full p-2.5 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="shrink-0 rounded-full p-2.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="block h-[18px] w-[18px] rounded-full border-2 border-white border-t-transparent animate-spin" />

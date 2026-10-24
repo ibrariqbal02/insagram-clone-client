@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useLogin } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/getErrorMessage";
 import { useState } from "react";
+import Logo from "../../components/atoms/Logo";
 
 type LoginFormData = {
   login: string;
@@ -27,22 +28,14 @@ const Login = () => {
   };
 
   return (
-    /*
-     * Real Instagram mobile login:
-     *   - Pure white background, no card/shadow
-     *   - Logo centered at ~40% from top
-     *   - Inputs are thin-bordered rectangles with gray bg
-     *   - Blue "Log in" button full-width
-     *   - "Forgot password?" below button
-     *   - Divider + "Sign up" link near bottom
-     */
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-10 py-12">
+    <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center px-8 py-12">
       <div className="w-full max-w-xs flex flex-col items-center gap-0">
 
-        {/* Wordmark */}
-        <h1 className="font-logo text-[44px] leading-none mb-8 select-none text-gray-900">
-          Instagram
-        </h1>
+        {/* Brand */}
+        <Logo size={44} className="mb-3" />
+        <p className="text-sm text-gray-500 text-center mb-8 leading-relaxed">
+          Practice speaking English with real people and AI
+        </p>
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-2.5">
@@ -51,15 +44,16 @@ const Login = () => {
           <div>
             <input
               type="text"
-              placeholder="Phone number, username, or email"
+              placeholder="Email or username"
               className="
-                w-full bg-gray-50 border border-gray-300 rounded-md
-                px-3 py-2.5 text-sm text-gray-900
+                w-full bg-gray-50 border border-gray-300 rounded-xl
+                px-3.5 min-h-[48px] text-sm text-gray-900
                 placeholder:text-gray-400
-                focus:outline-none focus:border-gray-400 focus:bg-white
+                focus:outline-none focus:border-brand-500 focus:bg-white
+                focus-visible:ring-2 focus-visible:ring-brand-500
                 transition
               "
-              {...register("login", { required: "Username or email is required" })}
+              {...register("login", { required: "Email or username is required" })}
             />
             {errors.login && (
               <p className="text-red-500 text-xs mt-1">{errors.login.message}</p>
@@ -107,9 +101,10 @@ const Login = () => {
             type="submit"
             disabled={loginMutation.isPending}
             className="
-              w-full bg-[#0095f6] hover:bg-[#1877f2] active:bg-[#1877f2]
-              text-white font-semibold rounded-lg py-2 text-sm
+              w-full bg-brand-600 hover:bg-brand-700 active:bg-brand-700
+              text-white font-bold rounded-xl min-h-[48px] text-sm
               disabled:opacity-60 transition mt-1
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2
             "
           >
             {loginMutation.isPending ? "Logging in…" : "Log in"}
@@ -119,7 +114,7 @@ const Login = () => {
         {/* Forgot password */}
         <Link
           to="/forgot-password"
-          className="text-xs text-[#00376b] mt-4 hover:underline"
+          className="text-sm text-gray-600 mt-5 py-2 hover:underline rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
         >
           Forgot password?
         </Link>
@@ -137,7 +132,7 @@ const Login = () => {
         <div className="w-full border-t border-gray-200 pt-5 text-center">
           <p className="text-sm text-gray-800">
             Don't have an account?{" "}
-            <Link to="/register" className="text-[#0095f6] font-semibold">
+            <Link to="/register" className="text-brand-600 font-semibold">
               Sign up
             </Link>
           </p>

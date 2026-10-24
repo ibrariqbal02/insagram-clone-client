@@ -12,6 +12,13 @@ import {
 import { useUpdatePrivacy } from "../../hooks/useProfile";
 
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { LANGUAGES } from "../../data/languages";
+import {
+  ENGLISH_LEVELS,
+  LEARNING_LANGUAGE_CODE,
+  PRACTICE_GOALS,
+} from "../../data/english";
+import { useToast } from "../ui/Toast";
 
 type User = {
   _id: string;
@@ -20,6 +27,10 @@ type User = {
   bio: string;
   profilePicture: string;
   isPrivate: boolean;
+  country?: string;
+  goal?: string;
+  nativeLanguages?: string[];
+  learningLanguages?: { code: string; level: string }[];
 };
 
 type Props = {
@@ -30,6 +41,7 @@ type Props = {
 const EditProfileModal = ({ user, onClose }: Props) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
 
   // -----------------------------
   // Mutations
@@ -47,6 +59,12 @@ const EditProfileModal = ({ user, onClose }: Props) => {
   const [name, setName] = useState(user.name);
   const [username, setUsername] = useState(user.username);
   const [bio, setBio] = useState(user.bio);
+  const [country, setCountry] = useState(user.country ?? "");
+  const [goal, setGoal] = useState(user.goal ?? "");
+  const [nativeLanguage, setNativeLanguage] = useState(user.nativeLanguages?.[0] ?? "");
+  const [englishLevel, setEnglishLevel] = useState(
+    user.learningLanguages?.[0]?.level ?? ""
+  );
 
   const [image,          setImage]          = useState<File | null>(null);
   const [preview,        setPreview]        = useState(user.profilePicture);
@@ -104,7 +122,20 @@ const EditProfileModal = ({ user, onClose }: Props) => {
     formData.append("name", name);
     formData.append("username", username);
     formData.append("bio", bio);
+    formData.append("country", country);
+    formData.append("goal", goal);
     formData.append("userId", user._id);
+
+    // Arrays go as JSON because this is a multipart request.
+    if (nativeLanguage) {
+      formData.append("nativeLanguages", JSON.stringify([nativeLanguage]));
+    }
+    if (englishLevel) {
+      formData.append(
+        "learningLanguages",
+        JSON.stringify([{ code: LEARNING_LANGUAGE_CODE, level: englishLevel }])
+      );
+    }
 
     if (image) {
       formData.append("profilePicture", image);
@@ -115,6 +146,7 @@ const EditProfileModal = ({ user, onClose }: Props) => {
 
     updateProfile.mutate(formData, {
       onSuccess: () => {
+        showToast("Profile updated", "success");
         onClose();
       },
 
@@ -255,7 +287,7 @@ const EditProfileModal = ({ user, onClose }: Props) => {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="relative w-28 h-28 rounded-full overflow-hidden border focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="relative w-28 h-28 rounded-full overflow-hidden border focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
               aria-label="Change profile photo"
             >
               {preview && !removePhoto ? (
@@ -280,7 +312,7 @@ const EditProfileModal = ({ user, onClose }: Props) => {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+                className="text-sm font-semibold text-brand-600 hover:text-brand-700"
               >
                 Change photo
               </button>
@@ -346,6 +378,75 @@ const EditProfileModal = ({ user, onClose }: Props) => {
             className="w-full border rounded-lg px-4 py-3"
           />
 
+          {/* Native language */}
+
+          <label className="block">
+            <span className="block text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-1.5">
+              Language you speak
+            </span>
+            <select
+              value={nativeLanguage}
+              onChange={(e) => setNativeLanguage(e.target.value)}
+              className="w-full border rounded-lg px-4 min-h-[44px] bg-white dark:bg-neutral-900"
+            >
+              <option value="">Not set</option>
+              {LANGUAGES.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* English level */}
+
+          <label className="block">
+            <span className="block text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-1.5">
+              English level
+            </span>
+            <select
+              value={englishLevel}
+              onChange={(e) => setEnglishLevel(e.target.value)}
+              className="w-full border rounded-lg px-4 min-h-[44px] bg-white dark:bg-neutral-900"
+            >
+              <option value="">Not set</option>
+              {ENGLISH_LEVELS.map((level) => (
+                <option key={level.value} value={level.value}>
+                  {level.value} — {level.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* Goal */}
+
+          <label className="block">
+            <span className="block text-sm font-semibold text-gray-700 dark:text-neutral-300 mb-1.5">
+              Practising for
+            </span>
+            <select
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              className="w-full border rounded-lg px-4 min-h-[44px] bg-white dark:bg-neutral-900"
+            >
+              <option value="">Not set</option>
+              {PRACTICE_GOALS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* Country */}
+
+          <input
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            placeholder="Country"
+            className="w-full border rounded-lg px-4 min-h-[44px]"
+          />
+
           {/* Bio */}
 
           <textarea
@@ -379,7 +480,7 @@ const EditProfileModal = ({ user, onClose }: Props) => {
             <button
               type="submit"
               disabled={updateProfile.isPending}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg disabled:opacity-50"
+              className="bg-brand-600 text-white px-6 py-2 rounded-lg disabled:opacity-50"
             >
               {updateProfile.isPending
                 ? "Saving..."

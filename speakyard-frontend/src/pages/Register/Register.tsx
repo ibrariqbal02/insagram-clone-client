@@ -4,6 +4,7 @@ import { useRegister } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/getErrorMessage";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import Logo from "../../components/atoms/Logo";
 
 type RegisterFormData = {
   name: string;
@@ -33,13 +34,11 @@ const Register = () => {
     <div className="min-h-screen bg-white flex flex-col items-center justify-between px-10 pt-12 pb-8">
       <div className="w-full max-w-xs flex flex-col items-center">
 
-        {/* Wordmark */}
-        <h1 className="font-logo text-[44px] leading-none mb-3 select-none text-gray-900">
-          Instagram
-        </h1>
+        {/* Brand */}
+        <Logo size={40} className="mb-3" />
 
-        <p className="text-base font-semibold text-gray-400 text-center mb-5 leading-snug">
-          Sign up to see photos and videos from your friends.
+        <p className="text-sm text-gray-500 text-center mb-6 leading-relaxed">
+          Practice speaking English with real people and AI
         </p>
 
         {/* Form */}
@@ -146,7 +145,7 @@ const Register = () => {
             type="submit"
             disabled={registerMutation.isPending}
             className="
-              w-full bg-[#0095f6] hover:bg-[#1877f2] active:bg-[#1877f2]
+              w-full bg-brand-600 hover:bg-brand-700 active:bg-brand-700
               text-white font-semibold rounded-lg py-2 text-sm
               disabled:opacity-60 transition
             "
@@ -161,7 +160,7 @@ const Register = () => {
         <div className="border-t border-gray-200 pt-5 text-center">
           <p className="text-sm text-gray-800">
             Already have an account?{" "}
-            <Link to="/login" className="text-[#0095f6] font-semibold">
+            <Link to="/login" className="text-brand-600 font-semibold">
               Log in
             </Link>
           </p>

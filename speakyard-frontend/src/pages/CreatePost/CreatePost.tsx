@@ -103,7 +103,7 @@ const CreatePost = () => {
           onDrop={handleDrop}
           className={`
             flex flex-col items-center justify-center gap-5 flex-1 px-8
-            transition ${isDragging ? "bg-blue-50" : "bg-white"}
+            transition ${isDragging ? "bg-brand-50" : "bg-white"}
           `}
         >
           <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center">
@@ -118,7 +118,7 @@ const CreatePost = () => {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="bg-[#0095f6] hover:bg-[#1877f2] text-white font-semibold text-sm rounded-lg px-5 py-2 transition"
+            className="bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm rounded-lg px-5 py-2 transition"
           >
             Select from gallery
           </button>
@@ -150,7 +150,7 @@ const CreatePost = () => {
           </span>
           <button
             onClick={() => setStep("caption")}
-            className="text-[#0095f6] font-semibold text-sm"
+            className="text-brand-600 font-semibold text-sm"
           >
             Next
           </button>
@@ -222,7 +222,7 @@ const CreatePost = () => {
                 key={i}
                 onClick={() => setActiveIndex(i)}
                 className={`shrink-0 w-14 h-14 rounded overflow-hidden border-2 transition ${
-                  i === activeIndex ? "border-[#0095f6]" : "border-transparent"
+                  i === activeIndex ? "border-brand-600" : "border-transparent"
                 }`}
               >
                 <img src={url} alt={`thumb ${i + 1}`} className="w-full h-full object-cover" />
@@ -274,7 +274,7 @@ const CreatePost = () => {
         <button
           onClick={handleShare}
           disabled={createPost.isPending}
-          className="text-[#0095f6] font-semibold text-sm disabled:opacity-50"
+          className="text-brand-600 font-semibold text-sm disabled:opacity-50"
         >
           {createPost.isPending ? "Sharing…" : "Share"}
         </button>

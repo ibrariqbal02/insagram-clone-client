@@ -1,44 +1,32 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Archive, Grid, Bookmark as BookmarkIcon } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 import { useMyProfile, useUserProfile } from "../../hooks/useProfile";
 import ProfileHeader from "../../components/organisms/ProfileHeader";
-import ProfilePosts from "../../components/organisms/ProfilePosts";
 import EditProfileModal from "../../components/organisms/EditProfileModal";
+import EmptyState from "../../components/ui/EmptyState";
+import Skeleton from "../../components/ui/Skeleton";
 
-/**
- * Thin tab bar separating Posts / Saved — mirrors real Instagram.
- * "Saved" is only shown on own profile.
- */
-const ProfileTabBar = ({
-  isMe,
-}: {
-  isMe: boolean;
-}) => (
-  <div className="flex border-t border-gray-200 bg-white">
-    {/* Posts tab — always active for now */}
-    <button className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border-t-2 border-gray-900 text-gray-900">
-      <Grid size={16} strokeWidth={1.8} />
-      <span className="text-xs font-semibold uppercase tracking-wide hidden sm:inline">
-        Posts
-      </span>
-    </button>
-
-    {isMe && (
-      <button className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border-t-2 border-transparent text-gray-400">
-        <BookmarkIcon size={16} strokeWidth={1.8} />
-        <span className="text-xs font-semibold uppercase tracking-wide hidden sm:inline">
-          Saved
-        </span>
-      </button>
-    )}
+const ProfileSkeleton = () => (
+  <div className="px-4 pt-5">
+    <div className="flex items-center gap-4 mb-4">
+      <Skeleton className="w-20 h-20" circle />
+      <div className="flex-1">
+        <Skeleton className="h-5 w-32 mb-2" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+    </div>
+    <Skeleton className="h-20 w-full" />
   </div>
 );
 
+/**
+ * Learner profile — who someone is and how they're practising.
+ * The old posts grid / saved / archive tabs were dropped in the 2.3b UX pass
+ * (the post pages themselves still exist, just not linked from here).
+ */
 const Profile = () => {
   const { userId } = useParams();
-  const navigate = useNavigate();
 
   const { data: myProfileData, isLoading: myLoading } = useMyProfile();
   const { data: otherProfileData, isLoading: otherLoading } = useUserProfile(userId ?? "");
@@ -47,75 +35,49 @@ const Profile = () => {
 
   /* ── Own profile ─────────────────────────────── */
   if (!userId) {
-    if (myLoading) {
-      return (
-        <div className="flex justify-center py-20 text-gray-500 text-sm">
-          Loading profile...
-        </div>
-      );
-    }
+    if (myLoading) return <ProfileSkeleton />;
 
     const me = myProfileData?.user;
 
     if (!me) {
       return (
-        <div className="flex justify-center py-20 text-gray-500 text-sm">
-          Could not load profile.
-        </div>
+        <EmptyState
+          emoji="🙁"
+          title="We couldn't load your profile"
+          description="Check your connection and refresh the page."
+        />
       );
     }
 
     return (
       <>
-        <div className="bg-white">
+        <div className="bg-white dark:bg-neutral-900 md:rounded-2xl md:border md:border-gray-200 md:dark:border-neutral-800 max-w-2xl mx-auto w-full md:mt-6">
           <ProfileHeader userId={me._id} onEditClick={() => setShowEditModal(true)} />
-          <ProfileTabBar isMe />
-          <ProfilePosts userId={me._id} />
-
-          {/* Archive link — subtle, below posts */}
-          <div className="flex justify-center py-6">
-            <button
-              onClick={() => navigate("/archive")}
-              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition"
-            >
-              <Archive size={15} />
-              View Archive
-            </button>
-          </div>
         </div>
 
         {showEditModal && (
-          <EditProfileModal
-            user={me}
-            onClose={() => setShowEditModal(false)}
-          />
+          <EditProfileModal user={me} onClose={() => setShowEditModal(false)} />
         )}
       </>
     );
   }
 
-  /* ── Another user's profile ──────────────────── */
-  if (otherLoading) {
-    return (
-      <div className="flex justify-center py-20 text-gray-500 text-sm">
-        Loading profile...
-      </div>
-    );
-  }
+  /* ── Another learner's profile ───────────────── */
+  if (otherLoading) return <ProfileSkeleton />;
 
   if (!otherProfileData?.user) {
     return (
-      <div className="flex justify-center py-20 text-gray-500 text-sm">
-        User not found.
-      </div>
+      <EmptyState
+        emoji="🔍"
+        title="Profile not found"
+        description="This learner may have deleted their account."
+      />
     );
   }
 
   return (
-    <div className="bg-white">
+    <div className="bg-white dark:bg-neutral-900 md:rounded-2xl md:border md:border-gray-200 md:dark:border-neutral-800 max-w-2xl mx-auto w-full md:mt-6">
       <ProfileHeader userId={userId} />
-      <ProfileTabBar isMe={false} />
-      <ProfilePosts userId={userId} />
     </div>
   );
 };

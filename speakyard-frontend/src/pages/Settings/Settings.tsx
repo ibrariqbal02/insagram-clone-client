@@ -112,8 +112,8 @@ const Settings = () => {
       className={`
         relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200
         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
-        focus-visible:outline-blue-500
-        ${checked ? "bg-[#0095f6]" : "bg-gray-300 dark:bg-neutral-600"}
+        focus-visible:outline-brand-500
+        ${checked ? "bg-brand-600" : "bg-gray-300 dark:bg-neutral-600"}
       `}
     >
       <span
@@ -174,10 +174,10 @@ const Settings = () => {
       <div className="bg-white dark:bg-black min-h-full">
         <SectionHeader title="About" onBack={() => setSection("main")} />
         <div className="px-4 py-6 space-y-2 text-sm text-gray-600 dark:text-neutral-300">
-          <p><span className="font-semibold">App:</span> Instagram Clone</p>
+          <p><span className="font-semibold">App:</span> Speakyard</p>
           <p><span className="font-semibold">Version:</span> 1.0.0</p>
           <p className="text-gray-400 dark:text-neutral-500 text-xs mt-4">
-            This is a demo project and is not affiliated with Instagram or Meta.
+            Practice speaking English with real people and AI.
           </p>
         </div>
       </div>

@@ -86,10 +86,21 @@ export type OnboardingData = {
   country?: string;
   interests?: string[];
   birthYear?: number | null;
+  goal?: string;
 };
 
 export const completeOnboarding = async (data: OnboardingData) => {
   const response = await api.patch("/auth/onboarding", data);
+  return response.data;
+};
+
+export const getPracticeStats = async () => {
+  const response = await api.get("/auth/stats");
+  return response.data;
+};
+
+export const getOnlinePartners = async () => {
+  const response = await api.get("/auth/online");
   return response.data;
 };
 

@@ -80,7 +80,7 @@ const MessageInput = ({ onSend, onSendVoice, onTyping, loading, voiceLoading }: 
         disabled={!text.trim() || loading}
         className={`shrink-0 rounded-full p-2.5 transition ${
           text.trim() && !loading
-            ? "bg-blue-500 hover:bg-blue-600 text-white"
+            ? "bg-brand-500 hover:bg-brand-600 text-white"
             : "bg-gray-100 text-gray-400 cursor-not-allowed"
         }`}
       >

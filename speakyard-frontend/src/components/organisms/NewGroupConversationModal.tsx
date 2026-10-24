@@ -88,7 +88,7 @@ const NewGroupConversationModal = ({ onClose }: Props) => {
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="e.g. Weekend squad"
               maxLength={60}
-              className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none focus:border-blue-500 transition"
+              className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition"
             />
           </div>
 
@@ -103,7 +103,7 @@ const NewGroupConversationModal = ({ onClose }: Props) => {
                   <button
                     key={u._id}
                     onClick={() => toggleUser(u)}
-                    className="flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200 pl-1 pr-2 py-1 text-sm text-blue-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition group"
+                    className="flex items-center gap-1.5 rounded-full bg-brand-50 border border-brand-200 pl-1 pr-2 py-1 text-sm text-brand-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition group"
                     title="Remove"
                   >
                     <Avatar src={u.profilePicture} name={u.name} size={6} />
@@ -125,7 +125,7 @@ const NewGroupConversationModal = ({ onClose }: Props) => {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="Search users..."
-              className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none focus:border-blue-500 transition"
+              className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none focus:border-brand-500 transition"
             />
           </div>
 
@@ -158,7 +158,7 @@ const NewGroupConversationModal = ({ onClose }: Props) => {
                   <div
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${
                       isSelected
-                        ? "bg-blue-500 border-blue-500"
+                        ? "bg-brand-500 border-brand-500"
                         : "border-gray-300"
                     }`}
                   >
@@ -180,7 +180,7 @@ const NewGroupConversationModal = ({ onClose }: Props) => {
           <button
             onClick={handleCreate}
             disabled={!canCreate || createGroup.isPending}
-            className="w-full rounded-xl bg-blue-500 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            className="w-full rounded-xl bg-brand-500 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
             {createGroup.isPending ? "Creating…" : "Create Group"}
           </button>

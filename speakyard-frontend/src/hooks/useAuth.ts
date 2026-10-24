@@ -90,6 +90,26 @@ export const useCompleteOnboarding = () => {
   });
 };
 
+export const usePracticeStats = () => {
+  return useQuery({
+    queryKey: ["practice-stats"],
+    queryFn: authService.getPracticeStats,
+    staleTime: 60 * 1000,
+  });
+};
+
+// Partners currently connected over Socket.IO. Presence events refresh this
+// list (see useOnlinePartnersSync in useSocket.ts); the interval is a fallback.
+export const useOnlinePartners = () => {
+  return useQuery({
+    queryKey: ["online-partners"],
+    queryFn: authService.getOnlinePartners,
+    staleTime: 15 * 1000,
+    refetchInterval: 60 * 1000,
+    refetchIntervalInBackground: false,
+  });
+};
+
 export const useDeleteAccount = () => {
   const queryClient = useQueryClient();
 

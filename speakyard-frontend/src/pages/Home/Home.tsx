@@ -44,7 +44,7 @@ const Home = () => {
         </p>
         <Link
           to="/search"
-          className="bg-[#0095f6] hover:bg-[#1877f2] text-white font-semibold text-sm rounded-lg px-5 py-2 transition"
+          className="bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm rounded-lg px-5 py-2 transition"
         >
           Find people to follow
         </Link>
@@ -65,7 +65,7 @@ const Home = () => {
           </div>
           <Link
             to="/search"
-            className="shrink-0 text-[#0095f6] font-semibold text-sm hover:underline"
+            className="shrink-0 text-brand-600 font-semibold text-sm hover:underline"
           >
             Find people
           </Link>

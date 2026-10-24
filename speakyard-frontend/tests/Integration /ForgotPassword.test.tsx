@@ -62,10 +62,10 @@ describe("ForgotPassword Component", () => {
   it("renders email input step correctly", () => {
     renderForgotPassword();
 
-    expect(screen.getByRole("heading", { name: /reset password/i })).toBeInTheDocument();
-    expect(screen.getByText(/enter your email and we'll send you an otp/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /trouble logging in/i })).toBeInTheDocument();
+    expect(screen.getByText(/we'll send you a code/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /send otp/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /send code/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /back to login/i })).toHaveAttribute("href", "/login");
   });
 
@@ -73,7 +73,7 @@ describe("ForgotPassword Component", () => {
     renderForgotPassword();
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("button", { name: /send otp/i }));
+    await user.click(screen.getByRole("button", { name: /send code/i }));
 
     expect(mockForgotPasswordMutate).not.toHaveBeenCalled();
   });
@@ -87,15 +87,15 @@ describe("ForgotPassword Component", () => {
     const user = userEvent.setup();
 
     await user.type(screen.getByPlaceholderText(/email/i), "user@example.com");
-    await user.click(screen.getByRole("button", { name: /send otp/i }));
+    await user.click(screen.getByRole("button", { name: /send code/i }));
 
     expect(mockForgotPasswordMutate).toHaveBeenCalledWith("user@example.com", expect.any(Object));
 
 
     expect(
-      await screen.findByText(/enter the otp we sent you and choose a new password/i)
+      await screen.findByText(/enter the code we sent you/i)
     ).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/otp/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/code/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/new password/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /reset password/i })).toBeInTheDocument();
   });
@@ -138,10 +138,10 @@ describe("ForgotPassword Component", () => {
 
 
     await user.type(screen.getByPlaceholderText(/email/i), "user@example.com");
-    await user.click(screen.getByRole("button", { name: /send otp/i }));
+    await user.click(screen.getByRole("button", { name: /send code/i }));
 
   
-    await user.type(screen.getByPlaceholderText(/otp/i), "123456");
+    await user.type(screen.getByPlaceholderText(/code/i), "123456");
     await user.type(screen.getByPlaceholderText(/new password/i), "newsecret123");
     await user.click(screen.getByRole("button", { name: /reset password/i }));
 
@@ -169,14 +169,14 @@ describe("ForgotPassword Component", () => {
 
     // Go to step 2
     await user.type(screen.getByPlaceholderText(/email/i), "user@example.com");
-    await user.click(screen.getByRole("button", { name: /send otp/i }));
+    await user.click(screen.getByRole("button", { name: /send code/i }));
 
     // Click "Use a different email"
     await user.click(screen.getByRole("button", { name: /use a different email/i }));
 
     // Verify back on step 1
     expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /send otp/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /send code/i })).toBeInTheDocument();
   });
 
   it("displays error message when password reset fails", async () => {
@@ -205,7 +205,7 @@ describe("ForgotPassword Component", () => {
 
 
     await user.type(screen.getByPlaceholderText(/email/i), "user@example.com");
-    await user.click(screen.getByRole("button", { name: /send otp/i }));
+    await user.click(screen.getByRole("button", { name: /send code/i }));
 
     expect(screen.getByText(/invalid or expired otp\./i)).toBeInTheDocument();
   });

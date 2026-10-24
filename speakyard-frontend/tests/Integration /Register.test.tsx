@@ -51,16 +51,18 @@ describe("Register Component", () => {
   it("renders all form elements, heading, and login link correctly", () => {
     renderRegister();
 
-    expect(screen.getByRole("heading", { name: /instagram/i })).toBeInTheDocument();
-    expect(screen.getByText(/sign up to see photos from your friends/i)).toBeInTheDocument();
+    expect(screen.getByText("Speakyard")).toBeInTheDocument();
+    expect(
+      screen.getByText(/practice speaking english with real people and ai/i)
+    ).toBeInTheDocument();
 
     expect(screen.getByPlaceholderText(/full name/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/username/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
 
-    expect(screen.getByRole("button", { name: /register/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /login/i })).toHaveAttribute("href", "/login");
+    expect(screen.getByRole("button", { name: /sign up/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /log in/i })).toHaveAttribute("href", "/login");
   });
 
 
@@ -69,7 +71,7 @@ describe("Register Component", () => {
     const user = userEvent.setup();
 
     
-    await user.click(screen.getByRole("button", { name: /register/i }));
+    await user.click(screen.getByRole("button", { name: /sign up/i }));
 
     expect(await screen.findByText(/^name is required/i)).toBeInTheDocument();
     expect(screen.getByText(/^username is required/i)).toBeInTheDocument();
@@ -88,10 +90,10 @@ describe("Register Component", () => {
     await user.type(screen.getByPlaceholderText(/email/i), "john@example.com");
     await user.type(screen.getByPlaceholderText(/password/i), "12345"); // Short password
 
-    await user.click(screen.getByRole("button", { name: /register/i }));
+    await user.click(screen.getByRole("button", { name: /sign up/i }));
 
     expect(
-      await screen.findByText(/password must be at least 8 characters/i)
+      await screen.findByText(/at least 8 characters/i)
     ).toBeInTheDocument();
     expect(mockMutate).not.toHaveBeenCalled();
   });
@@ -110,7 +112,7 @@ describe("Register Component", () => {
     await user.type(screen.getByPlaceholderText(/email/i), "john@example.com");
     await user.type(screen.getByPlaceholderText(/password/i), "password123");
 
-    await user.click(screen.getByRole("button", { name: /register/i }));
+    await user.click(screen.getByRole("button", { name: /sign up/i }));
 
     await waitFor(() => {
       expect(mockMutate).toHaveBeenCalledWith(
@@ -138,7 +140,7 @@ describe("Register Component", () => {
 
     renderRegister();
 
-    const submitBtn = screen.getByRole("button", { name: /creating account.../i });
+    const submitBtn = screen.getByRole("button", { name: /creating account/i });
     expect(submitBtn).toBeInTheDocument();
     expect(submitBtn).toBeDisabled();
   });

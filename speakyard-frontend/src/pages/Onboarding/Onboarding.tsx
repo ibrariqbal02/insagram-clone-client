@@ -1,87 +1,105 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Check } from "lucide-react";
+
 import { useCompleteOnboarding } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { LANGUAGES, type LanguageLevel } from "../../data/languages";
 import {
-  INTEREST_OPTIONS,
-  LANGUAGES,
-  LANGUAGE_LEVELS,
-  languageName,
-  type LanguageLevel,
-} from "../../data/languages";
-
-type LearningLanguage = { code: string; level: LanguageLevel };
+  ENGLISH_LEVELS,
+  LEARNING_LANGUAGE_CODE,
+  PRACTICE_GOALS,
+  type PracticeGoal,
+} from "../../data/english";
+import Logo from "../../components/atoms/Logo";
+import { useToast } from "../../components/ui/Toast";
 
 const STEP_TITLES = [
-  "What languages do you speak?",
-  "What are you learning?",
-  "Tell us a bit about you",
-  "Just to confirm",
+  "What language do you speak?",
+  "How good is your English?",
+  "Why are you learning English?",
   "One last thing",
 ];
 
 const TOTAL_STEPS = STEP_TITLES.length;
 
-const Chip = ({
+/** Full-width selectable row used for level and goal choices. */
+const OptionRow = ({
   selected,
   onClick,
-  children,
+  title,
+  description,
+  emoji,
+  badge,
 }: {
   selected: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  title: string;
+  description?: string;
+  emoji?: string;
+  badge?: string;
 }) => (
   <button
     type="button"
     onClick={onClick}
-    className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
-      selected
-        ? "bg-blue-500 border-blue-500 text-white"
-        : "bg-white border-gray-300 text-gray-700 hover:border-gray-400"
-    }`}
+    aria-pressed={selected}
+    className={`
+      flex items-center gap-3 w-full text-left rounded-xl border p-3.5 min-h-[56px] transition
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2
+      ${
+        selected
+          ? "border-brand-500 bg-brand-50 dark:bg-brand-900/30"
+          : "border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:border-gray-300"
+      }
+    `}
   >
-    {children}
+    {emoji && (
+      <span className="text-xl shrink-0" aria-hidden="true">
+        {emoji}
+      </span>
+    )}
+
+    {badge && (
+      <span
+        className={`shrink-0 w-11 text-center text-sm font-extrabold rounded-lg py-1 ${
+          selected
+            ? "bg-brand-600 text-white"
+            : "bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-neutral-300"
+        }`}
+      >
+        {badge}
+      </span>
+    )}
+
+    <span className="min-w-0 flex-1">
+      <span className="block font-semibold text-sm text-gray-900 dark:text-white">
+        {title}
+      </span>
+      {description && (
+        <span className="block text-xs text-gray-500 dark:text-neutral-400 mt-0.5 leading-snug">
+          {description}
+        </span>
+      )}
+    </span>
+
+    {selected && <Check size={18} className="text-brand-600 shrink-0" aria-hidden="true" />}
   </button>
 );
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const completeOnboarding = useCompleteOnboarding();
+  const { showToast } = useToast();
 
   const [step, setStep] = useState(0);
   const [stepError, setStepError] = useState<string | null>(null);
 
-  const [nativeLanguages, setNativeLanguages] = useState<string[]>([]);
-  const [learningLanguages, setLearningLanguages] = useState<LearningLanguage[]>([]);
-  const [newLearningCode, setNewLearningCode] = useState(LANGUAGES[0].code);
-  const [newLearningLevel, setNewLearningLevel] = useState<LanguageLevel>("A1");
-  const [country, setCountry] = useState("");
-  const [interests, setInterests] = useState<string[]>([]);
-  const [birthYear, setBirthYear] = useState("");
+  const [nativeLanguage, setNativeLanguage] = useState("");
+  const [englishLevel, setEnglishLevel] = useState<LanguageLevel | "">("");
+  const [goal, setGoal] = useState<PracticeGoal | "">("");
   const [micStatus, setMicStatus] = useState<"idle" | "requesting" | "granted" | "denied">(
     "idle"
   );
-
-  const toggleNativeLanguage = (code: string) => {
-    setNativeLanguages((prev) =>
-      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
-    );
-  };
-
-  const toggleInterest = (interest: string) => {
-    setInterests((prev) =>
-      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
-    );
-  };
-
-  const addLearningLanguage = () => {
-    if (learningLanguages.some((l) => l.code === newLearningCode)) return;
-    setLearningLanguages((prev) => [...prev, { code: newLearningCode, level: newLearningLevel }]);
-  };
-
-  const removeLearningLanguage = (code: string) => {
-    setLearningLanguages((prev) => prev.filter((l) => l.code !== code));
-  };
 
   const requestMicAccess = async () => {
     setMicStatus("requesting");
@@ -89,29 +107,27 @@ const Onboarding = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
       setMicStatus("granted");
+      showToast("Microphone ready", "success");
     } catch {
       setMicStatus("denied");
     }
   };
 
-  const currentYear = new Date().getFullYear();
-  const age = birthYear ? currentYear - Number(birthYear) : null;
-
   const goNext = () => {
     setStepError(null);
 
-    if (step === 0 && nativeLanguages.length === 0) {
-      setStepError("Pick at least one language you speak.");
+    if (step === 0 && !nativeLanguage) {
+      setStepError("Pick the language you speak best.");
       return;
     }
 
-    if (step === 1 && learningLanguages.length === 0) {
-      setStepError("Add at least one language you want to practice.");
+    if (step === 1 && !englishLevel) {
+      setStepError("Choose the level that sounds most like you.");
       return;
     }
 
-    if (step === 3 && birthYear && (age === null || age < 18)) {
-      setStepError("You must be at least 18 years old to use Speakyard.");
+    if (step === 2 && !goal) {
+      setStepError("Pick what you want to practise for.");
       return;
     }
 
@@ -130,190 +146,128 @@ const Onboarding = () => {
   const finish = () => {
     completeOnboarding.mutate(
       {
-        nativeLanguages,
-        learningLanguages,
-        country: country.trim() || undefined,
-        interests,
-        birthYear: birthYear ? Number(birthYear) : null,
+        nativeLanguages: [nativeLanguage],
+        // English-only for now; the field stays an array so other languages
+        // can be added later without a migration.
+        learningLanguages: [
+          { code: LEARNING_LANGUAGE_CODE, level: englishLevel as LanguageLevel },
+        ],
+        goal,
       },
       {
-        onSuccess: () => navigate("/"),
+        onSuccess: () => {
+          showToast("You're all set — welcome to Speakyard!", "success");
+          navigate("/");
+        },
       }
     );
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center px-6 py-10">
-      <div className="w-full max-w-sm">
+    <div className="min-h-[100dvh] bg-gray-50 dark:bg-black flex flex-col items-center px-5 py-8">
+      <div className="w-full max-w-md flex flex-col flex-1">
+        <Logo size={30} className="mb-7 self-center" />
+
         {/* Progress */}
-        <div className="flex gap-1.5 mb-6">
-          {STEP_TITLES.map((_, i) => (
+        <div className="flex gap-1.5 mb-6" role="presentation">
+          {STEP_TITLES.map((title, i) => (
             <div
-              key={i}
-              className={`h-1.5 flex-1 rounded-full ${
-                i <= step ? "bg-blue-500" : "bg-gray-200"
+              key={title}
+              className={`h-1.5 flex-1 rounded-full transition-colors ${
+                i <= step ? "bg-brand-500" : "bg-gray-200 dark:bg-neutral-800"
               }`}
             />
           ))}
         </div>
 
-        <p className="text-xs font-semibold text-gray-400 mb-1">
+        <p className="text-xs font-semibold text-gray-400 dark:text-neutral-500 mb-1">
           Step {step + 1} of {TOTAL_STEPS}
         </p>
-        <h1 className="text-xl font-bold text-gray-900 mb-5">{STEP_TITLES[step]}</h1>
+        <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-5 leading-tight">
+          {STEP_TITLES[step]}
+        </h1>
 
-        {/* Step 0 — native languages */}
+        {/* Step 0 — native language */}
         {step === 0 && (
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Languages you speak">
-            {LANGUAGES.map((lang) => (
-              <Chip
-                key={lang.code}
-                selected={nativeLanguages.includes(lang.code)}
-                onClick={() => toggleNativeLanguage(lang.code)}
-              >
-                {lang.name}
-              </Chip>
+          <div>
+            <p className="text-sm text-gray-500 dark:text-neutral-400 mb-4">
+              This helps us match you with the right practice partners.
+            </p>
+            <div className="grid grid-cols-2 gap-2" role="group" aria-label="Your language">
+              {LANGUAGES.map((lang) => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  aria-pressed={nativeLanguage === lang.code}
+                  onClick={() => setNativeLanguage(lang.code)}
+                  className={`
+                    rounded-xl border px-3 min-h-[48px] text-sm font-semibold transition
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2
+                    ${
+                      nativeLanguage === lang.code
+                        ? "border-brand-500 bg-brand-50 dark:bg-brand-900/30 text-brand-800 dark:text-brand-100"
+                        : "border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-700 dark:text-neutral-200 hover:border-gray-300"
+                    }
+                  `}
+                >
+                  {lang.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step 1 — English level */}
+        {step === 1 && (
+          <div className="space-y-2" role="group" aria-label="Your English level">
+            {ENGLISH_LEVELS.map((level) => (
+              <OptionRow
+                key={level.value}
+                badge={level.value}
+                title={level.label}
+                description={level.description}
+                selected={englishLevel === level.value}
+                onClick={() => setEnglishLevel(level.value)}
+              />
             ))}
           </div>
         )}
 
-        {/* Step 1 — learning languages + level */}
-        {step === 1 && (
-          <div>
-            <div className="flex gap-2 mb-3">
-              <select
-                aria-label="Language to practice"
-                value={newLearningCode}
-                onChange={(e) => setNewLearningCode(e.target.value)}
-                className="flex-1 border border-gray-300 rounded-md px-2 py-2 text-sm"
-              >
-                {LANGUAGES.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.name}
-                  </option>
-                ))}
-              </select>
-              <select
-                aria-label="Your level"
-                value={newLearningLevel}
-                onChange={(e) => setNewLearningLevel(e.target.value as LanguageLevel)}
-                className="border border-gray-300 rounded-md px-2 py-2 text-sm"
-              >
-                {LANGUAGE_LEVELS.map((lvl) => (
-                  <option key={lvl.value} value={lvl.value}>
-                    {lvl.value}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={addLearningLanguage}
-                className="bg-gray-900 text-white text-sm font-semibold rounded-md px-3"
-              >
-                Add
-              </button>
-            </div>
-
-            {learningLanguages.length === 0 ? (
-              <p className="text-sm text-gray-400">No languages added yet.</p>
-            ) : (
-              <ul className="space-y-2">
-                {learningLanguages.map((lang) => (
-                  <li
-                    key={lang.code}
-                    className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-sm"
-                  >
-                    <span>
-                      {languageName(lang.code)} ·{" "}
-                      {LANGUAGE_LEVELS.find((l) => l.value === lang.level)?.label ?? lang.level}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label={`Remove ${languageName(lang.code)}`}
-                      onClick={() => removeLearningLanguage(lang.code)}
-                      className="text-gray-400 hover:text-red-500"
-                    >
-                      ✕
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-
-        {/* Step 2 — country + interests (goals) */}
+        {/* Step 2 — goal */}
         {step === 2 && (
-          <div className="space-y-5">
-            <div>
-              <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Country
-              </label>
-              <input
-                id="country"
-                type="text"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                placeholder="Where are you from?"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+          <div className="space-y-2" role="group" aria-label="Your goal">
+            {PRACTICE_GOALS.map((option) => (
+              <OptionRow
+                key={option.value}
+                emoji={option.emoji}
+                title={option.label}
+                description={option.description}
+                selected={goal === option.value}
+                onClick={() => setGoal(option.value)}
               />
-            </div>
-
-            <div>
-              <p className="block text-sm font-medium text-gray-700 mb-1.5">
-                What do you want to talk about? (optional)
-              </p>
-              <div className="flex flex-wrap gap-2" role="group" aria-label="Interests">
-                {INTEREST_OPTIONS.map((interest) => (
-                  <Chip
-                    key={interest}
-                    selected={interests.includes(interest)}
-                    onClick={() => toggleInterest(interest)}
-                  >
-                    {interest}
-                  </Chip>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         )}
 
-        {/* Step 3 — birth year */}
+        {/* Step 3 — mic permission */}
         {step === 3 && (
-          <div>
-            <label htmlFor="birthYear" className="block text-sm font-medium text-gray-700 mb-1.5">
-              Birth year
-            </label>
-            <input
-              id="birthYear"
-              type="number"
-              inputMode="numeric"
-              value={birthYear}
-              onChange={(e) => setBirthYear(e.target.value)}
-              placeholder="e.g. 2000"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-            />
-            <p className="text-xs text-gray-400 mt-1.5">
-              You must be 18+ to join voice calls with other people. You can skip this for now.
-            </p>
-          </div>
-        )}
-
-        {/* Step 4 — mic permission */}
-        {step === 4 && (
-          <div className="text-center py-4">
-            <div className="text-5xl mb-4">🎙️</div>
-            <p className="text-sm text-gray-500 mb-5">
-              Speakyard uses your microphone for voice practice. You can allow it now or later from
-              your browser settings.
+          <div className="text-center py-2">
+            <div className="text-5xl mb-4" aria-hidden="true">
+              🎙️
+            </div>
+            <p className="text-sm text-gray-500 dark:text-neutral-400 mb-5 leading-relaxed">
+              Speakyard uses your microphone for speaking practice. You can allow it now, or
+              later from your browser settings.
             </p>
 
             {micStatus === "granted" && (
-              <p className="text-sm font-semibold text-green-600 mb-3">Microphone access granted.</p>
+              <p className="text-sm font-semibold text-brand-600 mb-3">
+                Microphone access granted.
+              </p>
             )}
             {micStatus === "denied" && (
               <p className="text-sm font-semibold text-red-500 mb-3">
-                Microphone access was denied. You can enable it later in your browser settings.
+                No problem — you can turn the microphone on later.
               </p>
             )}
 
@@ -321,28 +275,41 @@ const Onboarding = () => {
               type="button"
               onClick={requestMicAccess}
               disabled={micStatus === "requesting" || micStatus === "granted"}
-              className="bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-semibold rounded-lg px-5 py-2 text-sm transition"
+              className="
+                min-h-[44px] px-5 rounded-xl bg-white dark:bg-neutral-900 border border-gray-300
+                dark:border-neutral-700 hover:border-brand-400 font-semibold text-sm transition
+                disabled:opacity-60 text-gray-900 dark:text-white
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2
+              "
             >
-              {micStatus === "requesting" ? "Requesting…" : "Allow microphone access"}
+              {micStatus === "requesting" ? "Requesting…" : "Allow microphone"}
             </button>
           </div>
         )}
 
-        {stepError && <p className="text-red-500 text-xs mt-3">{stepError}</p>}
+        {stepError && (
+          <p className="text-red-500 text-sm mt-4" role="alert">
+            {stepError}
+          </p>
+        )}
 
         {completeOnboarding.isError && (
-          <p className="text-red-500 text-xs mt-3">
+          <p className="text-red-500 text-sm mt-4" role="alert">
             {getErrorMessage(completeOnboarding.error, "Could not save your profile.")}
           </p>
         )}
 
         {/* Nav buttons */}
-        <div className="flex items-center justify-between mt-8">
+        <div className="flex items-center justify-between gap-3 mt-8 pt-2">
           <button
             type="button"
             onClick={goBack}
             disabled={step === 0}
-            className="text-sm font-semibold text-gray-500 disabled:opacity-0"
+            className="
+              min-h-[44px] px-4 text-sm font-semibold text-gray-500 dark:text-neutral-400
+              disabled:opacity-0 rounded-xl
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500
+            "
           >
             Back
           </button>
@@ -351,13 +318,17 @@ const Onboarding = () => {
             type="button"
             onClick={goNext}
             disabled={completeOnboarding.isPending}
-            className="bg-[#0095f6] hover:bg-[#1877f2] disabled:opacity-60 text-white font-semibold rounded-lg px-6 py-2 text-sm transition"
+            className="
+              flex-1 max-w-[200px] min-h-[48px] bg-brand-600 hover:bg-brand-700 disabled:opacity-60
+              text-white font-bold rounded-xl px-6 transition
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2
+            "
           >
             {step < TOTAL_STEPS - 1
-              ? "Next"
+              ? "Continue"
               : completeOnboarding.isPending
                 ? "Saving…"
-                : "Finish"}
+                : "Start practising"}
           </button>
         </div>
       </div>

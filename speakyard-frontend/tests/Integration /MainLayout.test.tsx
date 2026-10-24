@@ -65,12 +65,14 @@ describe("MainLayout Component", () => {
   });
 
 
-  it("applies desktop sidebar margin offset and container styles to main element", () => {
+  it("offsets the main area by the sidebar width from 768px up", () => {
     renderWithRouter();
 
     const mainElement = screen.getByRole("main");
 
-
-    expect(mainElement).toHaveClass("lg:ml-64", "max-w-7xl", "mx-auto", "pb-24", "lg:pb-6");
+    // Sidebar is 245px wide and appears at the md (768px) breakpoint;
+    // below that the bottom tab bar needs clearance instead.
+    expect(mainElement.className).toContain("md:ml-[245px]");
+    expect(mainElement.className).toContain("pb-tab-bar");
   });
 });

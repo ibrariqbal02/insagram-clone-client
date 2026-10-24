@@ -71,7 +71,7 @@ const CommentList = ({ postId, currentUserId }: Props) => {
         <button
           onClick={handleCreateComment}
           disabled={createComment.isPending}
-          className="bg-blue-600 text-white px-5 rounded-lg disabled:opacity-50"
+          className="bg-brand-600 text-white px-5 rounded-lg disabled:opacity-50"
         >
           Send
         </button>

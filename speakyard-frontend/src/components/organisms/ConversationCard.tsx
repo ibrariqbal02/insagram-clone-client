@@ -97,7 +97,7 @@ const ConversationCard = ({
                 )}
               </div>
             ))}
-            <div className="absolute -bottom-0.5 -right-0.5 bg-[#0095f6] rounded-full p-0.5">
+            <div className="absolute -bottom-0.5 -right-0.5 bg-brand-600 rounded-full p-0.5">
               <Users size={9} className="text-white" />
             </div>
           </div>

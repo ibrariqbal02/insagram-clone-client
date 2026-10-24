@@ -123,8 +123,8 @@ const MessageBubble = ({
         className={`max-w-[75%] rounded-2xl shadow-sm ${
           isVoice
             ? // Voice bubbles: minimal padding, slightly wider
-              `px-3 py-2 ${isMine ? "bg-blue-500 rounded-br-sm" : "bg-white border rounded-bl-sm"}`
-            : `px-4 py-2 ${isMine ? "bg-blue-500 text-white rounded-br-sm" : "bg-white border rounded-bl-sm"}`
+              `px-3 py-2 ${isMine ? "bg-brand-500 rounded-br-sm" : "bg-white border rounded-bl-sm"}`
+            : `px-4 py-2 ${isMine ? "bg-brand-500 text-white rounded-br-sm" : "bg-white border rounded-bl-sm"}`
         } ${message._optimistic ? "opacity-70" : ""}`}
       >
         {/* ── Voice message ── */}
@@ -159,7 +159,7 @@ const MessageBubble = ({
             {/* Timestamp */}
             <p
               className={`text-[11px] mt-0.5 ${
-                isMine ? "text-blue-100" : "text-gray-400"
+                isMine ? "text-brand-100" : "text-gray-400"
               }`}
             >
               {timestamp}
@@ -199,7 +199,7 @@ const MessageBubble = ({
             </p>
             <p
               className={`mt-0.5 text-[11px] ${
-                isMine ? "text-blue-100" : "text-gray-400"
+                isMine ? "text-brand-100" : "text-gray-400"
               }`}
             >
               {timestamp}

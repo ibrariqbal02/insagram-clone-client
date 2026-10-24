@@ -68,7 +68,7 @@ const FollowersModal = ({ userId, onClose }: Props) => {
                       onClick={() => followUser.mutate(u._id)}
                       disabled={isFollowRowLoading}
                       className={`px-4 py-2 rounded-lg text-sm text-white disabled:opacity-60 ${
-                        isFollowing ? "bg-gray-600" : "bg-blue-600"
+                        isFollowing ? "bg-gray-600" : "bg-brand-600"
                       }`}
                     >
                       {isFollowRowLoading ? "Loading..." : isFollowing ? "Following" : "Follow"}

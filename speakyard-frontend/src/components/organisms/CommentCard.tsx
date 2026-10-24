@@ -141,7 +141,7 @@ const CommentCard = ({
             />
             <button
               onClick={handleSaveEdit}
-              className="px-4 rounded-lg bg-blue-600 text-white text-sm"
+              className="px-4 rounded-lg bg-brand-600 text-white text-sm"
             >
               Save
             </button>
@@ -178,7 +178,7 @@ const CommentCard = ({
             <button
               onClick={handleSendReply}
               disabled={createComment.isPending}
-              className="px-4 rounded-lg bg-blue-600 text-white text-sm"
+              className="px-4 rounded-lg bg-brand-600 text-white text-sm"
             >
               Send
             </button>

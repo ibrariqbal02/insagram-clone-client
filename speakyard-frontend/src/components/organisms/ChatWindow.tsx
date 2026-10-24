@@ -165,7 +165,7 @@ const ChatWindow = ({ conversationId }: Props) => {
               </p>
               <p className="text-xs text-gray-500 truncate">
                 {isSomeoneTyping ? (
-                  <span className="text-blue-500">typing…</span>
+                  <span className="text-brand-500">typing…</span>
                 ) : otherUser?.username ? (
                   `@${otherUser.username}`
                 ) : null}

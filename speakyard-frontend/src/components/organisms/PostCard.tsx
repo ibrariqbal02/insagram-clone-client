@@ -252,7 +252,7 @@ const PostCard = ({ post }: Props) => {
             <button
               onClick={handlePostComment}
               disabled={createComment.isPending}
-              className="text-[#0095f6] font-semibold text-sm disabled:opacity-50"
+              className="text-brand-600 font-semibold text-sm disabled:opacity-50"
             >
               Post
             </button>

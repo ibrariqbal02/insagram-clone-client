@@ -48,7 +48,7 @@ const NotificationCard = ({ notification, onClick, onDelete }: Props) => {
       className={`
         flex items-center gap-3 px-4 py-2.5 cursor-pointer
         active:bg-gray-100 dark:active:bg-neutral-800 transition
-        ${notification.isRead ? "bg-white dark:bg-black" : "bg-blue-50 dark:bg-blue-950"}
+        ${notification.isRead ? "bg-white dark:bg-black" : "bg-brand-50 dark:bg-brand-950"}
       `}
     >
       {/* Avatar */}

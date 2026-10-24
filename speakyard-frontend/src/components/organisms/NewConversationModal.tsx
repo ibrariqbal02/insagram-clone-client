@@ -83,7 +83,7 @@ const NewConversationModal = ({ onClose, initialMessage }: Props) => {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="Search users..."
-          className="mb-4 w-full rounded-lg border px-4 py-3 outline-none focus:border-blue-500"
+          className="mb-4 w-full rounded-lg border px-4 py-3 outline-none focus:border-brand-500"
         />
 
         <div className="max-h-80 overflow-y-auto">
@@ -133,7 +133,7 @@ const NewConversationModal = ({ onClose, initialMessage }: Props) => {
                 <button
                   onClick={() => handleCreate(user._id)}
                   disabled={isBusy}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-brand-600 px-4 py-2 text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isBusy
                     ? "Sending..."

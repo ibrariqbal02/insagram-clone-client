@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useForgotPassword, useResetPassword } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import Logo from "../../components/atoms/Logo";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -33,24 +34,26 @@ const ForgotPassword = () => {
     <div className="min-h-screen bg-white flex flex-col items-center justify-between px-10 pt-14 pb-8">
       <div className="w-full max-w-xs flex flex-col items-center">
 
+        <Logo size={36} className="mb-6" />
+
         {/* Lock icon */}
-        <div className="w-16 h-16 rounded-full border-2 border-gray-900 flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center mb-4">
           <svg
             viewBox="0 0 24 24" fill="none" stroke="currentColor"
             strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
-            className="w-8 h-8 text-gray-900"
+            className="w-7 h-7 text-brand-700"
           >
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
         </div>
 
-        <h2 className="font-semibold text-base text-gray-900 mb-1">
+        <h2 className="font-bold text-base text-gray-900 mb-1">
           Trouble logging in?
         </h2>
-        <p className="text-sm text-gray-500 text-center mb-6 leading-snug">
+        <p className="text-sm text-gray-500 text-center mb-6 leading-relaxed">
           {otpSent
-            ? "Enter the OTP we sent you and choose a new password."
+            ? "Enter the code we sent you and choose a new password."
             : "Enter your email and we'll send you a code to get back into your account."}
         </p>
 
@@ -78,11 +81,11 @@ const ForgotPassword = () => {
               type="submit"
               disabled={forgotPassword.isPending}
               className="
-                w-full bg-[#0095f6] hover:bg-[#1877f2] text-white
+                w-full bg-brand-600 hover:bg-brand-700 text-white
                 font-semibold rounded-lg py-2 text-sm disabled:opacity-60 transition
               "
             >
-              {forgotPassword.isPending ? "Sending…" : "Send login link"}
+              {forgotPassword.isPending ? "Sending…" : "Send code"}
             </button>
 
             {/* OR divider */}
@@ -105,7 +108,7 @@ const ForgotPassword = () => {
               type="text"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              placeholder="Enter OTP"
+              placeholder="Enter the 6-digit code"
               className="
                 w-full bg-gray-50 border border-gray-300 rounded-md
                 px-3 py-2.5 text-sm placeholder:text-gray-400
@@ -134,7 +137,7 @@ const ForgotPassword = () => {
               type="submit"
               disabled={resetPassword.isPending}
               className="
-                w-full bg-[#0095f6] hover:bg-[#1877f2] text-white
+                w-full bg-brand-600 hover:bg-brand-700 text-white
                 font-semibold rounded-lg py-2 text-sm disabled:opacity-60 transition
               "
             >

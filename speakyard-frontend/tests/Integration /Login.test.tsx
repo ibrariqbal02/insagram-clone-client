@@ -46,16 +46,18 @@ describe("Login Component", () => {
   it("renders heading, login form fields, buttons, and routing links", () => {
     renderLogin();
 
-    expect(screen.getByRole("heading", { name: /instagram/i })).toBeInTheDocument();
-    expect(screen.getByText(/login to your account/i)).toBeInTheDocument();
+    expect(screen.getByText("Speakyard")).toBeInTheDocument();
+    expect(
+      screen.getByText(/practice speaking english with real people and ai/i)
+    ).toBeInTheDocument();
 
     expect(screen.getByPlaceholderText(/email or username/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
 
-    expect(screen.getByRole("button", { name: /login/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /log in/i })).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: /forgot password\?/i })).toHaveAttribute("href", "/forgot-password");
-    expect(screen.getByRole("link", { name: /register/i })).toHaveAttribute("href", "/register");
+    expect(screen.getByRole("link", { name: /sign up/i })).toHaveAttribute("href", "/register");
   });
 
 
@@ -63,7 +65,7 @@ describe("Login Component", () => {
     renderLogin();
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("button", { name: /login/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
 
     expect(await screen.findByText(/email or username is required/i)).toBeInTheDocument();
     expect(screen.getByText(/password is required/i)).toBeInTheDocument();
@@ -83,7 +85,7 @@ describe("Login Component", () => {
     await user.type(screen.getByPlaceholderText(/email or username/i), "johndoe");
     await user.type(screen.getByPlaceholderText(/password/i), "password123");
 
-    await user.click(screen.getByRole("button", { name: /login/i }));
+    await user.click(screen.getByRole("button", { name: /log in/i }));
 
     await waitFor(() => {
       expect(mockMutate).toHaveBeenCalledWith(
@@ -108,7 +110,7 @@ describe("Login Component", () => {
 
     renderLogin();
 
-    const submitBtn = screen.getByRole("button", { name: /logging in.../i });
+    const submitBtn = screen.getByRole("button", { name: /logging in/i });
     expect(submitBtn).toBeInTheDocument();
     expect(submitBtn).toBeDisabled();
   });

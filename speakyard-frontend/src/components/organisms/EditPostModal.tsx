@@ -108,7 +108,7 @@ const EditPostModal = ({ post, onClose }: Props) => {
               <button
                 type="submit"
                 disabled={updatePost.isPending}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg"
+                className="bg-brand-600 text-white px-6 py-2 rounded-lg"
               >
                 {updatePost.isPending ? "Saving..." : "Save"}
               </button>
